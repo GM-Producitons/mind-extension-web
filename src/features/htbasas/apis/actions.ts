@@ -3,17 +3,19 @@
 import { getDB } from '@/lib/db';
 import { ObjectId } from 'mongodb';
 
-export async function addTodo(title: string, date: Date) {
+export async function addTodo(title: string, date: Date, fromTime: string = '12:00', untilTime: string = '13:00') {
   try {
     const db = await getDB();
     const result = await db.collection('todos').insertOne({
       title,
       date: new Date(date),
+      fromTime,
+      untilTime,
       completed: false,
       createdAt: new Date(),
     });
 
-    return JSON.parse(JSON.stringify({ success: true, todo: { _id: result.insertedId, title, date, completed: false } }));
+    return JSON.parse(JSON.stringify({ success: true, todo: { _id: result.insertedId, title, date, fromTime, untilTime, completed: false } }));
   } catch (error) {
     console.error('Error adding todo:', error);
     return JSON.parse(JSON.stringify({ success: false, error: 'Failed to add todo' }));
@@ -64,6 +66,21 @@ export async function updateTodoCompleted(todoId: string, completed: boolean) {
     const result = await db.collection('todos').updateOne(
       { _id: new ObjectId(todoId) },
       { $set: { completed } }
+    );
+
+    return JSON.parse(JSON.stringify({ success: true, modifiedCount: result.modifiedCount }));
+  } catch (error) {
+    console.error('Error updating todo:', error);
+    return JSON.parse(JSON.stringify({ success: false, error: 'Failed to update todo' }));
+  }
+}
+
+export async function updateTodo(todoId: string, title: string, date: Date, fromTime: string, untilTime: string) {
+  try {
+    const db = await getDB();
+    const result = await db.collection('todos').updateOne(
+      { _id: new ObjectId(todoId) },
+      { $set: { title, date: new Date(date), fromTime, untilTime } }
     );
 
     return JSON.parse(JSON.stringify({ success: true, modifiedCount: result.modifiedCount }));

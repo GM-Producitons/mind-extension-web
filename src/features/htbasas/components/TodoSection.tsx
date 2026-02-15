@@ -9,8 +9,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Plus } from 'lucide-react';
-import { addTodo, getTodos, updateTodoCompleted } from '../apis/actions';
+import { EllipsisVertical, Plus } from 'lucide-react';
+import { addTodo, getTodos, updateTodoCompleted, updateTodo } from '../apis/actions';
 
 interface TodoItem {
   _id: string;
@@ -18,6 +18,8 @@ interface TodoItem {
   date: string;
   completed: boolean;
   createdAt: string;
+  fromTime?: string;
+  untilTime?: string;
 }
 
 interface TodoSectionProps {
@@ -31,7 +33,14 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
   const [filteredTodos, setFilteredTodos] = useState<TodoItem[]>([]);
   const [todoTitle, setTodoTitle] = useState('');
   const [todoDate, setTodoDate] = useState(today.toISOString().split('T')[0]);
+  const [todoFromTime, setTodoFromTime] = useState('12:00');
+  const [todoUntilTime, setTodoUntilTime] = useState('13:00');
   const [todoOpen, setTodoOpen] = useState(false);
+  const [editingTodoId, setEditingTodoId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editFromTime, setEditFromTime] = useState('');
+  const [editUntilTime, setEditUntilTime] = useState('');
   const [todoLoading, setTodoLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
 
@@ -62,15 +71,22 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
       return todoDate >= dateStart && todoDate < dateEnd;
     });
 
-    setFilteredTodos(filtered);
-    onTodosLoaded(filtered);
+    // Sort by time
+    const sorted = filtered.sort((a, b) => {
+      const timeA = a.fromTime || '12:00';
+      const timeB = b.fromTime || '12:00';
+      return timeA.localeCompare(timeB);
+    });
+
+    setFilteredTodos(sorted);
+    onTodosLoaded(sorted);
   };
 
   const handleAddTodo = async () => {
     if (!todoTitle.trim()) return;
 
     setTodoLoading(true);
-    const result = await addTodo(todoTitle, new Date(todoDate));
+    const result = await addTodo(todoTitle, new Date(todoDate), todoFromTime, todoUntilTime);
 
     if (result.success) {
       const newTodo: TodoItem = {
@@ -79,12 +95,16 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
         date: todoDate,
         completed: false,
         createdAt: new Date().toISOString(),
+        fromTime: todoFromTime,
+        untilTime: todoUntilTime,
       };
       const updatedTodos = [...todos, newTodo];
       setTodos(updatedTodos);
       filterTodosByDate(updatedTodos, selectedDate);
       setTodoTitle('');
       setTodoDate(today.toISOString().split('T')[0]);
+      setTodoFromTime('12:00');
+      setTodoUntilTime('13:00');
       setTodoOpen(false);
     }
     setTodoLoading(false);
@@ -101,6 +121,51 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
       setTodos(updatedTodos);
       filterTodosByDate(updatedTodos, selectedDate);
     }
+  };
+
+  const handleEditTodo = (todo: TodoItem) => {
+    setEditingTodoId(todo._id);
+    setEditTitle(todo.title);
+    setEditDate(todo.date);
+    setEditFromTime(todo.fromTime || '12:00');
+    setEditUntilTime(todo.untilTime || '13:00');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editTitle.trim() || !editingTodoId) return;
+
+    setTodoLoading(true);
+    const result = await updateTodo(editingTodoId, editTitle, new Date(editDate), editFromTime, editUntilTime);
+
+    if (result.success) {
+      const updatedTodos = todos.map((todo) =>
+        todo._id === editingTodoId
+          ? {
+              ...todo,
+              title: editTitle,
+              date: editDate,
+              fromTime: editFromTime,
+              untilTime: editUntilTime,
+            }
+          : todo
+      );
+      setTodos(updatedTodos);
+      filterTodosByDate(updatedTodos, selectedDate);
+      setEditingTodoId(null);
+      setEditTitle('');
+      setEditDate('');
+      setEditFromTime('');
+      setEditUntilTime('');
+    }
+    setTodoLoading(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTodoId(null);
+    setEditTitle('');
+    setEditDate('');
+    setEditFromTime('');
+    setEditUntilTime('');
   };
 
   const formatDate = (dateString: string) => {
@@ -152,6 +217,33 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
                   value={todoDate}
                   onChange={(e) => setTodoDate(e.target.value)}
                 />
+                <div className='grid grid-cols-2 gap-2'>
+                  <div>
+
+                  <label className="text-sm font-medium text-muted-foreground">
+                  From
+                </label>
+                <Input
+                type="time"
+                value={todoFromTime}
+                onChange={(e) => setTodoFromTime(e.target.value)}
+                />
+                </div>
+
+                <div>
+
+                <label className="text-sm font-medium text-muted-foreground">
+                  Until
+                </label>
+                <Input
+                type="time"
+                value={todoUntilTime}
+                onChange={(e) => setTodoUntilTime(e.target.value)}
+                />
+                </div>
+
+                </div>
+                
               </div>
               <Button
                 onClick={handleAddTodo}
@@ -173,21 +265,94 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
           </p>
         ) : (
           filteredTodos.map((todo) => (
-            <div
-              key={todo._id}
-              className="flex items-start gap-2 sm:gap-3 p-2 sm:p-4 bg-muted rounded-lg hover:bg-accent transition"
-            >
-              <Checkbox
-                className="mt-0.5 sm:mt-1"
-                checked={todo.completed}
-                onCheckedChange={() => handleCheckboxChange(todo._id, todo.completed)}
-              />
-              <div className="flex-1 min-w-0">
-                <p className={`font-medium text-sm sm:text-base break-words ${todo.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                  {todo.title}
-                </p>
-                <p className="text-xs sm:text-sm text-muted-foreground">{formatDate(todo.date)}</p>
-              </div>
+            <div key={todo._id}>
+              {editingTodoId === todo._id ? (
+                <div className="p-2 sm:p-4 bg-muted rounded-lg space-y-3 border border-foreground">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Title</label>
+                    <Input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      placeholder="Todo title"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Date</label>
+                    <Input
+                      type="date"
+                      value={editDate}
+                      onChange={(e) => setEditDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">From</label>
+                      <Input
+                        type="time"
+                        value={editFromTime}
+                        onChange={(e) => setEditFromTime(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Until</label>
+                      <Input
+                        type="time"
+                        value={editUntilTime}
+                        onChange={(e) => setEditUntilTime(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleSaveEdit}
+                      disabled={!editTitle.trim() || todoLoading}
+                      size="sm"
+                      className="flex-1"
+                    >
+                      {todoLoading ? 'Saving...' : 'Save'}
+                    </Button>
+                    <Button
+                      onClick={handleCancelEdit}
+                      disabled={todoLoading}
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-4 bg-muted rounded-lg hover:bg-accent transition">
+                  <Checkbox
+                    className="mt-0.5 sm:mt-1"
+                    checked={todo.completed}
+                    onCheckedChange={() => handleCheckboxChange(todo._id, todo.completed)}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`font-medium text-sm sm:text-base break-words ${
+                        todo.completed ? 'line-through text-muted-foreground' : 'text-foreground'
+                      }`}
+                    >
+                      {todo.title}
+                    </p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      {formatDate(todo.date)}
+                      {todo.fromTime && ` • ${todo.fromTime}`}
+                      {todo.untilTime && ` - ${todo.untilTime}`}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => handleEditTodo(todo)}
+                    size="sm"
+                    variant="outline"
+                    className="text-xs px-2 py-1"
+                  >
+                    <EllipsisVertical size={14} className="sm:w-4 sm:h-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           ))
         )}

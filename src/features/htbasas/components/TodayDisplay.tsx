@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import TodoSection from './TodoSection';
 import TTRSection from './TTRSection';
 
+
 const TodayDisplay = () => {
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(new Date(today.getFullYear(), today.getMonth(), today.getDate()));
