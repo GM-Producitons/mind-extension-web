@@ -8,11 +8,16 @@ import { useRouter } from "next/navigation"
 
 export default function Login(){
     const [password, setPassword] = useState("")
+    const [email, setEmail] = useState("")
     const [error, setError] = useState("")
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
     async function handleLogin(){
+        if (!email.trim()) {
+            setError("Please enter an email")
+            return
+        }
         if (!password.trim()) {
             setError("Please enter a password")
             return
@@ -20,7 +25,7 @@ export default function Login(){
         
         setError("")
         setLoading(true)
-        const result = await loginUser(password)
+        const result = await loginUser(email,password)
         
         if (result.success) {
             // Cookie is set server-side, just refresh so middleware lets us through
@@ -40,7 +45,10 @@ export default function Login(){
             <CardContent>
                 <div className="flex flex-col items-center space-y-2">
                     <p>Email/Name</p>
-                    <Input disabled value="gogo05tv@gmail.com" />
+                    <Input 
+                        onChange={(e) => setEmail(e.target.value)}
+                        value={email}
+                    />
                     <p>Pass</p>
                     <Input 
                         type="password"

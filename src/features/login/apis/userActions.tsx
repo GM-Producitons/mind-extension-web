@@ -1,42 +1,42 @@
 "use server";
 import { cookies } from "next/headers";
 import { getDB } from "@/lib/db";
-import { createHash, compareHash } from "@/features/login/lib/auth-helpers";
+import { createHash, compareHash } from "@/lib/auth-utils";
 import { generateToken } from "@/lib/auth-utils";
 
 // One-time helper to create yourself in the DB
-export async function createOneUser(pass: string) {
-    try {
-        const db = await getDB();
-        const hashedPass = await createHash(pass);
-        const userInserted = await db.collection("users").insertOne({
-            email: "gogo05tv@gmail.com",
-            name: "GM",
-            password: hashedPass,
-            isMe: true,
-        });
-        return { success: true, user: JSON.parse(JSON.stringify(userInserted)) };
-    } catch (error) {
-        console.error("Error adding user:", error);
-        return { success: false, error: "Failed to add user" };
-    }
-}
+// export async function createOneUser(pass: string) {
+//     try {
+//         const db = await getDB();
+//         const hashedPass = await createHash(pass);
+//         const userInserted = await db.collection("users").insertOne({
+//             email: "gogo05tv@gmail.com",
+//             name: "GM",
+//             password: hashedPass,
+//             isMe: true,
+//         });
+//         return { success: true, user: JSON.parse(JSON.stringify(userInserted)) };
+//     } catch (error) {
+//         console.error("Error adding user:", error);
+//         return { success: false, error: "Failed to add user" };
+//     }
+// }
 
 // Login: verify password → create JWT → set httpOnly cookie
-export async function loginUser(password: string) {
+export async function loginUser(email: string, password: string) {
     try {
         const db = await getDB();
         const user = await db
             .collection("users")
-            .findOne({ email: "gogo05tv@gmail.com" });
+            .findOne({ email: email });
 
         if (!user) {
-            return { success: false, error: "User not found" };
+            return { success: false, error: "انت مين يخول" };
         }
 
         const isPasswordValid = await compareHash(password, user.password);
         if (!isPasswordValid) {
-            return { success: false, error: "Invalid password" };
+            return { success: false, error: "غلط, حطه صح" };
         }
 
         const token = await generateToken({

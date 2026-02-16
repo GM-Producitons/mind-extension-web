@@ -1,4 +1,13 @@
 import { SignJWT, jwtVerify } from 'jose';
+import bcrypt from "bcryptjs";
+
+export async function createHash(pass: string){
+    return bcrypt.hash(pass,14)
+}
+
+export async function compareHash(pass: string, hash: string){
+    return bcrypt.compare(pass,hash)
+}
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'your-secret-key-change-in-env-at-least-32-chars-long'
