@@ -1,0 +1,146 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": true,
+  "editor.fontSize": 12,
+  "chat.editing.alwaysSaveWithGeneratedChanges": true,
+  "files.autoSave": "onWindowChange",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // Todo Tree Tags
+  "todo-tree.general.tags": [
+    "TODO",
+    "FIXME",
+    "BUG",
+    "HACK",
+    "XXX",
+    "NOTE",
+    "OPTIMIZE",
+    "@username",
+    "[ ]",
+    "[x]"
+  ],
+
+  // Custom Icons for Tags
+  "todo-tree.highlights.customHighlight": {
+    "TODO": {
+      "icon": "checklist",
+      "foreground": "#ff681d",
+      "background": "#003c71",
+      "iconColour": "#ff681d"
+    },
+    "FIXME": {
+      "icon": "flame",
+      "foreground": "#ff0000",
+      "background": "#3d4451",
+      "iconColour": "#ff0000"
+    },
+    "BUG": {
+      "icon": "bug",
+      "foreground": "#d9534f",
+      "background": "#3d4451",
+      "iconColour": "#d9534f"
+    },
+    "HACK": {
+      "icon": "tools",
+      "foreground": "#ff8c00",
+      "background": "#003c71",
+      "iconColour": "#ff8c00"
+    },
+    "XXX": {
+      "icon": "x",
+      "foreground": "#ff681d",
+      "background": "#003c71",
+      "iconColour": "#ff681d"
+    },
+    "NOTE": {
+      "icon": "note",
+      "foreground": "#17a2b8",
+      "background": "#003c71",
+      "iconColour": "#17a2b8"
+    },
+    "OPTIMIZE": {
+      "icon": "rocket",
+      "foreground": "#28a745",
+      "background": "#003c71",
+      "iconColour": "#28a745"
+    },
+    "@username": {
+      "icon": "mention",
+      "foreground": "#fca5a5",
+      "background": "#003c71",
+      "iconColour": "#fca5a5"
+    },
+    "[ ]": {
+      "icon": "circle-outline",
+      "foreground": "#17a2b8",
+      "background": "#d9e0e7",
+      "iconColour": "#17a2b8"
+    },
+    "[x]": {
+      "icon": "check-circle",
+      "foreground": "#28a745",
+      "background": "#d9e0e7",
+      "iconColour": "#28a745"
+    }
+  },
+
+  // Tree View Settings
+  "todo-tree.tree.autoRefresh": true,
+  "todo-tree.tree.showScanModeButton": true,
+  "todo-tree.tree.showCountsInTree": true,
+  "todo-tree.tree.showCompletedItems": true,
+  "todo-tree.tree.labelFormat": "${after} [${tag}]",
+  "todo-tree.tree.expanded": true,
+
+  // Highlights
+  "todo-tree.highlights.useColourScheme": true,
+  "todo-tree.highlights.defaultHighlight": {
+    "foreground": "#003c71",
+    "background": "#d9e0e7",
+    "icon": "note"
+  },
+
+  // Search Customizations
+  "todo-tree.general.regex": "((//|#|<!--|;|/\\|^)\\s($TAGS)\\s*:?.*$)|\\[x\\]|\\[ \\]",
+  "todo-tree.general.rootFolder": "",
+  "todo-tree.filtering.includeGlobs": [
+    "/*.js",
+    "/*.ts",
+    "/*.tsx",
+    "/*.jsx",
+    "/*.css",
+    "/*.scss",
+    "/*.html",
+    "/*.md"
+  ],
+  "todo-tree.filtering.excludeGlobs": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    ".git"
+  ],
+  "todo-tree.regex.regexCaseSensitive": false,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false,
+    "html": false,
+    "typescriptreact": true
+  },
+  "chat.instructionsFilesLocations": {
+    ".github/instructions": true,
+    "C:\\Users\\user\\AppData\\Local\\Temp\\postman-http-request-post-response.instructions.md": true,
+    "C:\\Users\\user\\AppData\\Local\\Temp\\postman-http-request-pre-request.instructions.md": true,
+    "C:\\Users\\user\\AppData\\Local\\Temp\\postman-collections-post-response.instructions.md": true,
+    "C:\\Users\\user\\AppData\\Local\\Temp\\postman-collections-pre-request.instructions.md": true,
+    "C:\\Users\\user\\AppData\\Local\\Temp\\postman-folder-post-response.instructions.md": true,
+    "C:\\Users\\user\\AppData\\Local\\Temp\\postman-folder-pre-request.instructions.md": true
+  },
+  "github.copilot.nextEditSuggestions.enabled": true
+}

@@ -4,23 +4,29 @@ import { verifyToken } from "./lib/auth-utils";
 
 // Routes that don't need auth
 const PUBLIC_ROUTES = ["/login"];
-
+const forbiddenRoutes = ["/"];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("auth-token")?.value;
+  const isForbidden = forbiddenRoutes.some(
+    (route) => pathname === route || pathname.startsWith(route + "/"),
+  );
 
   const isPublic = PUBLIC_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route + "/")
+    (route) => pathname === route || pathname.startsWith(route + "/"),
   );
 
   // Already logged in? Redirect away from login page
   if (isPublic && token) {
     const payload = await verifyToken(token);
     if (payload) {
-      return NextResponse.redirect(new URL("/", request.url));
+      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 
+  if (isForbidden) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
   // Not a public route? Must have a valid token
   if (!isPublic) {
     if (!token) {
