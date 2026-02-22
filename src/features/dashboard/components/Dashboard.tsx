@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { Brain, Zap, Eye } from "lucide-react";
 import { ReactNode } from "react";
-import { Card, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { useEffect } from "react";
+import PrayerTime from "@/features/prayerTime/components/PrayerTime";
 interface SubApp {
   id: string;
   title: string;
@@ -56,14 +57,6 @@ function renderAppCard(app: SubApp): ReactNode {
 }
 
 export default function Dashboard() {
-  useEffect(() => {
-    async function zeft() {
-      await fetch("../api/actions")
-        .then((res) => res.json())
-        .then((data) => console.log(data));
-    }
-    zeft();
-  }, []);
   return (
     <div className="p-20 pt-16 w-full min-h-screen bg-background">
       {/* Row 1: Main Dashboard and Right Section */}
@@ -119,9 +112,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Prayer */}
-        <Card className="h-40 flex p-4">
-          <CardTitle>Prayer</CardTitle>
-        </Card>
+        <PrayerTime height="h-40" />
 
         {/* Next event */}
         <Card className="h-40 flex items-center justify-center">
