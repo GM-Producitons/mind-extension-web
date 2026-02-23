@@ -6,7 +6,6 @@ import { ReactNode } from "react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import PrayerTime from "@/features/prayerTime/components/PrayerTime";
-import { getPrayerTimes } from "@/features/prayerTime/apis/actions";
 interface SubApp {
   id: string;
   title: string;
@@ -58,14 +57,11 @@ function renderAppCard(app: SubApp): ReactNode {
   );
 }
 
+useEffect(() => {
+  async function zeft() {}
+}, []);
+
 export default function Dashboard() {
-  useEffect(() => {
-    async function zeft() {
-      const result = await getPrayerTimes();
-      console.log(result);
-      setManga(result.data);
-    }
-  }, []);
   return (
     <div className="p-20 pt-16 w-full min-h-screen bg-background">
       {/* Row 1: Main Dashboard and Right Section */}
@@ -121,8 +117,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Prayer */}
-        {/* <PrayerTime height="h-40" /> */}
-        <div>{manga ?? "loading"}</div>
+        <PrayerTime height="h-40" />
 
         {/* Next event */}
         <Card className="h-40 flex items-center justify-center">
