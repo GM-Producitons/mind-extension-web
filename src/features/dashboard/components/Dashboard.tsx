@@ -58,15 +58,14 @@ function renderAppCard(app: SubApp): ReactNode {
   );
 }
 
-useEffect(() => {
-  async function zeft() {
-    const result = await getPrayerTimes();
-    console.log(result);
-    setManga(result.data);
-  }
-}, []);
-
 export default function Dashboard() {
+  useEffect(() => {
+    async function zeft() {
+      const result = await getPrayerTimes();
+      console.log(result);
+      setManga(result.data);
+    }
+  }, []);
   return (
     <div className="p-20 pt-16 w-full min-h-screen bg-background">
       {/* Row 1: Main Dashboard and Right Section */}
