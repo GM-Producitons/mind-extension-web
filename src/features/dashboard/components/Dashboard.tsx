@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Brain, Zap, Eye } from "lucide-react";
 import { ReactNode } from "react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { useEffect, useState } from "react";
 import PrayerTime from "@/features/prayerTime/components/PrayerTime";
 interface SubApp {
   id: string;
@@ -14,7 +13,6 @@ interface SubApp {
   icon: ReactNode;
 }
 
-const [manga, setManga] = useState<string>("");
 const subAppsData: SubApp[] = [
   {
     id: "htbasas",
@@ -56,10 +54,6 @@ function renderAppCard(app: SubApp): ReactNode {
     </Link>
   );
 }
-
-useEffect(() => {
-  async function zeft() {}
-}, []);
 
 export default function Dashboard() {
   return (
