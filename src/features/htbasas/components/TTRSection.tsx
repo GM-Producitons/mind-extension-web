@@ -1,15 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { Plus } from 'lucide-react';
-import { addTTR, getTTRs } from '../apis/actions';
+} from "@/components/ui/popover";
+import { Plus } from "lucide-react";
+import { addTTR, getTTRs } from "../apis/actions";
+import { Textarea } from "@/components/ui/textarea";
 
 interface TTRItem {
   _id: string;
@@ -27,8 +28,8 @@ const TTRSection = ({ selectedDate, onTTRsLoaded }: TTRSectionProps) => {
   const today = new Date();
   const [ttrs, setTtrs] = useState<TTRItem[]>([]);
   const [filteredTtrs, setFilteredTtrs] = useState<TTRItem[]>([]);
-  const [ttrTitle, setTtrTitle] = useState('');
-  const [ttrDate, setTtrDate] = useState(today.toISOString().split('T')[0]);
+  const [ttrTitle, setTtrTitle] = useState("");
+  const [ttrDate, setTtrDate] = useState(today.toISOString().split("T")[0]);
   const [ttrOpen, setTtrOpen] = useState(false);
   const [ttrLoading, setTtrLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -52,7 +53,11 @@ const TTRSection = ({ selectedDate, onTTRsLoaded }: TTRSectionProps) => {
   }, [selectedDate, ttrs]);
 
   const filterTTRsByDate = (ttrsList: TTRItem[], dateToFilter: Date) => {
-    const dateStart = new Date(dateToFilter.getFullYear(), dateToFilter.getMonth(), dateToFilter.getDate());
+    const dateStart = new Date(
+      dateToFilter.getFullYear(),
+      dateToFilter.getMonth(),
+      dateToFilter.getDate(),
+    );
     const dateEnd = new Date(dateStart.getTime() + 24 * 60 * 60 * 1000);
 
     const filtered = ttrsList.filter((ttr) => {
@@ -80,8 +85,8 @@ const TTRSection = ({ selectedDate, onTTRsLoaded }: TTRSectionProps) => {
       const updatedTtrs = [...ttrs, newTTR];
       setTtrs(updatedTtrs);
       filterTTRsByDate(updatedTtrs, selectedDate);
-      setTtrTitle('');
-      setTtrDate(today.toISOString().split('T')[0]);
+      setTtrTitle("");
+      setTtrDate(today.toISOString().split("T")[0]);
       setTtrOpen(false);
     }
     setTtrLoading(false);
@@ -89,16 +94,18 @@ const TTRSection = ({ selectedDate, onTTRsLoaded }: TTRSectionProps) => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
     });
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
-        <h2 className="text-base sm:text-lg font-semibold text-foreground">TTR</h2>
+        <h2 className="text-base sm:text-lg font-semibold text-foreground">
+          TTR
+        </h2>
         <Popover open={ttrOpen} onOpenChange={setTtrOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -118,12 +125,12 @@ const TTRSection = ({ selectedDate, onTTRsLoaded }: TTRSectionProps) => {
                 <label className="text-sm font-medium text-muted-foreground">
                   Title
                 </label>
-                <Input
+                <Textarea
                   placeholder="Enter TTR title"
                   value={ttrTitle}
                   onChange={(e) => setTtrTitle(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleAddTTR();
+                    if (e.key === "Enter") handleAddTTR();
                   }}
                 />
               </div>
@@ -142,7 +149,7 @@ const TTRSection = ({ selectedDate, onTTRsLoaded }: TTRSectionProps) => {
                 disabled={!ttrTitle.trim() || ttrLoading}
                 className="w-full"
               >
-                {ttrLoading ? 'Adding...' : 'Add TTR'}
+                {ttrLoading ? "Adding..." : "Add TTR"}
               </Button>
             </div>
           </PopoverContent>
@@ -150,7 +157,9 @@ const TTRSection = ({ selectedDate, onTTRsLoaded }: TTRSectionProps) => {
       </div>
       <div className="space-y-2 sm:space-y-3">
         {isInitializing ? (
-          <p className="text-center text-muted-foreground py-4 text-sm sm:text-base">Loading...</p>
+          <p className="text-center text-muted-foreground py-4 text-sm sm:text-base">
+            Loading...
+          </p>
         ) : filteredTtrs.length === 0 ? (
           <p className="text-center text-muted-foreground py-4 text-sm sm:text-base">
             No TTRs for this day
@@ -162,8 +171,12 @@ const TTRSection = ({ selectedDate, onTTRsLoaded }: TTRSectionProps) => {
               className="flex items-start gap-2 sm:gap-3 p-2 sm:p-4 bg-muted rounded-lg hover:bg-accent transition"
             >
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm sm:text-base text-foreground break-words">{ttr.title}</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">{formatDate(ttr.date)}</p>
+                <p className="font-medium text-sm sm:text-base text-foreground break-words">
+                  {ttr.title}
+                </p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  {formatDate(ttr.date)}
+                </p>
               </div>
             </div>
           ))
