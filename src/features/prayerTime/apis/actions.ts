@@ -11,6 +11,7 @@ export async function getPrayerTimes(
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
+      console.log("Failed to fetch prayer times:", response.statusText);
     }
     const data = await response.json();
     return data;

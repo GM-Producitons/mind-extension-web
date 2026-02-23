@@ -20,6 +20,7 @@ export default function PrayerTime({
   );
   const [nextPrayer, setNextPrayer] = useState<NextPrayerInfo | null>(null);
   const [countdown, setCountdown] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
 
   const formatCountdown = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
@@ -50,20 +51,25 @@ export default function PrayerTime({
 
   useEffect(() => {
     async function fetchPrayerTimes() {
-      const user = await getMe();
-      if (!user) {
-        console.error("User not found");
-        return;
-      }
-      const { lat, long } = user;
-      const method = 5;
-      const school = 1;
-      const prayerTimes = await getPrayerTimes(lat, long, method, school);
-      setPrayerTimes(prayerTimes);
-
-      if (prayerTimes) {
+      try {
+        const user = await getMe();
+        if (!user) {
+          setError("User not found");
+          return;
+        }
+        const { lat, long } = user;
+        const method = 5;
+        const school = 1;
+        const prayerTimes = await getPrayerTimes(lat, long, method, school);
+        if (!prayerTimes) {
+          setError("Prayer times API returned no data (check API key)");
+          return;
+        }
+        setPrayerTimes(prayerTimes);
         const next = getNextPrayerInfo(prayerTimes);
         setNextPrayer(next);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
       }
     }
     fetchPrayerTimes();
@@ -119,6 +125,8 @@ export default function PrayerTime({
               </p>
             </div>
           </>
+        ) : error ? (
+          <p className="text-center text-red-500 text-xs">{error}</p>
         ) : (
           <p className="text-center text-gray-500 text-xs">Loading...</p>
         )}
