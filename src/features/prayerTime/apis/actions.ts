@@ -9,7 +9,7 @@ export async function getPrayerTimes(
 ) {
   try {
     const response = await axios.get(
-      `https://islamicapi.com/api/v1/prayer-time/?lat=${latitude}&lon=${longitude}&method=${method}&school=${school}&api_key=${process.env.IslamicAPI}`,
+      `https://islamicapi.com/api/v1/prayer-time/?lat=${31.250168}&lon=${29.972676}&method=${5}&school=${1}&api_key=LxXspFjzfJuIdYOKIEmbSFI6Wk8SqtgCzAnmbjw0tOSqPwdt`,
     );
     console.log(response);
     // if (!response.ok) {
