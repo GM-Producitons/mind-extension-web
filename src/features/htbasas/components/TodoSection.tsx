@@ -100,7 +100,7 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
     if (result.success) {
       addForm.reset();
       setTodoOpen(false);
-      setTodos(result.todos);
+      setTodos(result.todos? );
     }
   };
 
