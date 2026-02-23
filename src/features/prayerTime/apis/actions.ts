@@ -2,10 +2,10 @@
 import axios from "axios";
 
 export async function getPrayerTimes(
-  latitude: number,
-  longitude: number,
-  method: number,
-  school: number,
+  latitude?: number,
+  longitude?: number,
+  method?: number,
+  school?: number,
 ) {
   try {
     const response = await axios.get(

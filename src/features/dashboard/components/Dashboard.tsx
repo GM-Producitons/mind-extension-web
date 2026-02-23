@@ -4,8 +4,9 @@ import Link from "next/link";
 import { Brain, Zap, Eye } from "lucide-react";
 import { ReactNode } from "react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import PrayerTime from "@/features/prayerTime/components/PrayerTime";
+import { getPrayerTimes } from "@/features/prayerTime/apis/actions";
 interface SubApp {
   id: string;
   title: string;
@@ -14,6 +15,7 @@ interface SubApp {
   icon: ReactNode;
 }
 
+const [manga, setManga] = useState<string>("");
 const subAppsData: SubApp[] = [
   {
     id: "htbasas",
@@ -55,6 +57,14 @@ function renderAppCard(app: SubApp): ReactNode {
     </Link>
   );
 }
+
+useEffect(() => {
+  async function zeft() {
+    const result = await getPrayerTimes();
+    console.log(result);
+    setManga(result.data);
+  }
+}, []);
 
 export default function Dashboard() {
   return (
@@ -112,7 +122,8 @@ export default function Dashboard() {
         </Card>
 
         {/* Prayer */}
-        <PrayerTime height="h-40" />
+        {/* <PrayerTime height="h-40" /> */}
+        <div>{manga ?? "loading"}</div>
 
         {/* Next event */}
         <Card className="h-40 flex items-center justify-center">
