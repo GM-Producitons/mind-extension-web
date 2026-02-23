@@ -1,4 +1,6 @@
 "use server";
+import axios from "axios";
+
 export async function getPrayerTimes(
   latitude: number,
   longitude: number,
@@ -6,7 +8,7 @@ export async function getPrayerTimes(
   school: number,
 ) {
   try {
-    const response = await fetch(
+    const response = await axios.get(
       `https://islamicapi.com/api/v1/prayer-time/?lat=${latitude}&lon=${longitude}&method=${method}&school=${school}&api_key=${process.env.IslamicAPI}`,
     );
     console.log(response);
@@ -14,7 +16,7 @@ export async function getPrayerTimes(
     //   const body = await response.text();
     //   throw new Error(`Prayer API error ${response.status}: ${body}`);
     // }
-    const data = await response.json();
+    const data = response.data;
     console.log(data);
     return data;
   } catch (error) {
