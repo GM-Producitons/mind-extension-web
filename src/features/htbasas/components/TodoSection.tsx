@@ -100,7 +100,7 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
     if (result.success) {
       addForm.reset();
       setTodoOpen(false);
-      setTodos(result.todos? );
+      setTodos(result.todos ?? []);
     }
   };
 
@@ -110,7 +110,7 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
   ) => {
     const result = await toggleTodoCompleted(todoId, currentCompleted);
     if (result.success) {
-      setTodos(result.todos);
+      setTodos(result.todos ?? []);
     }
   };
 
@@ -141,7 +141,7 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
     );
 
     if (result.success) {
-      setTodos(result.todos);
+      setTodos(result.todos ?? []);
       setEditingTodoId(null);
       editForm.reset();
     }
