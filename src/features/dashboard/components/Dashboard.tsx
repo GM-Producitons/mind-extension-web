@@ -40,7 +40,7 @@ const subAppsData: SubApp[] = [
 function renderAppCard(app: SubApp): ReactNode {
   return (
     <Link key={app.id} href={app.href}>
-      <div className="h-full p-4 sm:p-6 bg-card rounded-lg border border-border hover:bg-accent hover:border-primary transition-all cursor-pointer shadow-sm hover:shadow-md">
+      <div className="h-full p-4 sm:p-6 bg-card rounded-lg border border-border hover:bg-secondary hover:border-primary transition-all cursor-pointer shadow-sm hover:shadow-md">
         <div className="flex items-start justify-between mb-4">
           <div className="p-2 sm:p-3 bg-primary/10 rounded-lg">{app.icon}</div>
         </div>
@@ -111,7 +111,12 @@ export default function Dashboard() {
         </Card>
 
         {/* Prayer */}
-        <PrayerTime height="h-40" />
+        {/* <PrayerTime height="h-40" /> */}
+        <Card className="h-40 flex items-center justify-center">
+          <h3 className="text-lg font-semibold text-muted-foreground">
+            {"out of service :("}
+          </h3>
+        </Card>
 
         {/* Next event */}
         <Card className="h-40 flex items-center justify-center">
