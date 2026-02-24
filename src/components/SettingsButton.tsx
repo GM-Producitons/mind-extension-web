@@ -78,6 +78,18 @@ export default function SettingsButton() {
     }
   };
 
+  const handleTouchStart = () => {
+    pressTimeRef.current = Date.now();
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const pressDuration = Date.now() - pressTimeRef.current;
+    // Only toggle menu on quick taps (less than 150ms), not on holds
+    if (pressDuration < 150) {
+      setOpen((prev) => !prev);
+    }
+  };
+
   return (
     <Draggable nodeRef={buttonRef}>
       <div
@@ -138,8 +150,10 @@ export default function SettingsButton() {
           <Button
             onMouseDown={handleMouseDown}
             onClick={handleClick}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
             size="icon"
-            className="h-12 w-12 rounded-full shadow-lg flex-shrink-0 z-2"
+            className="h-12 w-12 rounded-full shadow-lg shrink-0 z-2"
           >
             <motion.div
               animate={{ rotate: open ? 180 : 0 }}
