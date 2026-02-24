@@ -14,6 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { addBusEntry } from "../apis/actions";
 
 function getTimeFromDate() {
   const currentDate = new Date();
@@ -38,8 +39,9 @@ export default function AverageBus() {
     setEntry((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Handle the entry submission here
+    await addBusEntry(entry);
     console.log("Entry submitted:", entry);
     setOpen(false);
   };
