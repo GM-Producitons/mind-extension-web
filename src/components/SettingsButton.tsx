@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import router, { useRouter } from "next/router";
 import {
   Settings,
   LayoutDashboard,
@@ -121,7 +122,8 @@ export default function SettingsButton() {
                 }}
               >
                 {app.href === "#" ? (
-                  <button
+                  <Button
+                    variant="ghost"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -133,15 +135,18 @@ export default function SettingsButton() {
                     className="flex items-center justify-center text-primary hover:text-accent transition-colors"
                   >
                     {app.icon}
-                  </button>
+                  </Button>
                 ) : (
-                  <Link
-                    href={app.href}
+                  <Button
+                    variant="ghost"
                     className="flex items-center justify-center text-primary hover:text-accent transition-colors"
-                    onClick={() => setOpen(false)}
+                    onClick={() => {
+                      setOpen(false);
+                      router.push(app.href);
+                    }}
                   >
                     {app.icon}
-                  </Link>
+                  </Button>
                 )}
               </motion.div>
             ))}
