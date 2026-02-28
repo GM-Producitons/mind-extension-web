@@ -12,7 +12,11 @@ import { useTodoCRUD } from "./todo/useTodoCRUD";
 import { useTodoForm } from "./todo/useTodoForm";
 import { TodoForm } from "./todo/TodoForm";
 import { TodoItem } from "./todo/TodoItem";
-import { calculateDuration } from "./todo/utils";
+import {
+  calculateDuration,
+  calculateEndTime,
+  getLocalDateString,
+} from "./todo/utils";
 
 interface TodoItem {
   _id: string;
@@ -62,6 +66,19 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
     filterTodosByDate(todos, selectedDate);
   }, [selectedDate, todos]);
 
+  // Update form date and time when selectedDate changes
+  useEffect(() => {
+    const dateString = getLocalDateString(selectedDate);
+    addForm.setTodoDate(dateString);
+  }, [selectedDate]);
+
+  // Update fromTime when date changes or popover opens
+  useEffect(() => {
+    if (todoOpen) {
+      updateFormTimeForDate(addForm.todoDate, todos);
+    }
+  }, [addForm.todoDate, todoOpen]);
+
   const filterTodosByDate = (todosList: TodoItem[], dateToFilter: Date) => {
     const dateStart = new Date(
       dateToFilter.getFullYear(),
@@ -84,6 +101,41 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
 
     setFilteredTodos(sorted);
     onTodosLoaded(sorted);
+  };
+
+  const updateFormTimeForDate = (dateString: string, todosList: TodoItem[]) => {
+    // Find todos for the specified date
+    const dateToFilter = new Date(dateString);
+    const dateStart = new Date(
+      dateToFilter.getFullYear(),
+      dateToFilter.getMonth(),
+      dateToFilter.getDate(),
+    );
+    const dateEnd = new Date(dateStart.getTime() + 24 * 60 * 60 * 1000);
+
+    const todosForDate = todosList.filter((todo) => {
+      const todoDate = new Date(todo.date);
+      return todoDate >= dateStart && todoDate < dateEnd;
+    });
+
+    if (todosForDate.length > 0) {
+      // Find the latest task by sorting in reverse order
+      const sorted = todosForDate.sort((a, b) => {
+        const timeA = a.fromTime || "00:00";
+        const timeB = b.fromTime || "00:00";
+        return timeB.localeCompare(timeA); // Reverse order to get latest
+      });
+
+      const latestTodo = sorted[0];
+      if (latestTodo.fromTime && latestTodo.untilTime) {
+        // Set fromTime to the end time of the latest task
+        addForm.setTodoFromTime(latestTodo.untilTime);
+      }
+    } else {
+      // No tasks for this date, reset to current time
+      const now = new Date();
+      addForm.setTodoFromTime(now.toTimeString().slice(0, 5));
+    }
   };
 
   const handleAddTodo = async () => {

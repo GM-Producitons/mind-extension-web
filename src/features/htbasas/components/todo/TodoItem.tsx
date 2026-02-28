@@ -96,7 +96,7 @@ export const TodoItem = ({
   return (
     <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-4 bg-muted rounded-lg hover:bg-accent transition">
       <Checkbox
-        className="mt-0.5 sm:mt-1"
+        className="mt-0.5 sm:mt-1 border-primary"
         checked={todo.completed}
         onCheckedChange={() => onCheckChange(todo._id, todo.completed)}
       />
