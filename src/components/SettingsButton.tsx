@@ -124,6 +124,19 @@ export default function SettingsButton() {
                 {app.href === "#" ? (
                   <Button
                     variant="ghost"
+                    onTouchStart={() => {
+                      pressTimeRef.current = Date.now();
+                    }}
+                    onTouchEnd={() => {
+                      const pressDuration = Date.now() - pressTimeRef.current;
+                      if (pressDuration < 150) {
+                        if (mounted && theme) {
+                          setTheme(theme === "dark" ? "light" : "dark");
+                        }
+                        setOpen(false);
+                        console.log("Toggled theme");
+                      }
+                    }}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -131,6 +144,7 @@ export default function SettingsButton() {
                         setTheme(theme === "dark" ? "light" : "dark");
                       }
                       setOpen(false);
+                      console.log("Toggled theme");
                     }}
                     className="flex items-center justify-center text-primary hover:text-accent transition-colors"
                   >
@@ -139,10 +153,22 @@ export default function SettingsButton() {
                 ) : (
                   <Button
                     variant="ghost"
+                    onTouchStart={() => {
+                      pressTimeRef.current = Date.now();
+                    }}
+                    onTouchEnd={() => {
+                      const pressDuration = Date.now() - pressTimeRef.current;
+                      if (pressDuration < 150) {
+                        setOpen(false);
+                        router.push(app.href);
+                        console.log("manga");
+                      }
+                    }}
                     className="flex items-center justify-center text-primary hover:text-accent transition-colors"
                     onClick={() => {
                       setOpen(false);
                       router.push(app.href);
+                      console.log("manga");
                     }}
                   >
                     {app.icon}
