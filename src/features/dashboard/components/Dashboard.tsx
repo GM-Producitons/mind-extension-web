@@ -202,7 +202,7 @@ function MobileCardLayout() {
           </h3>
         </Card>
 
-        <Card className="absolute bottom-0 w-[120px] h-[calc(100%-118px)] right-0">
+        <Card className="absolute bottom-0 w-30 h-[calc(100%-118px)] right-0">
           <h3 className="text-sm font-semibold text-muted-foreground text-center">
             gym
           </h3>
