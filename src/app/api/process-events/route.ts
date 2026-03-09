@@ -1,5 +1,12 @@
 import { getDB } from "@/lib/db";
 import { NextResponse } from "next/server";
+import webpush from "web-push";
+
+webpush.setVapidDetails(
+  "mailto:your-email@example.com",
+  process.env.VAPID_PUBLIC_KEY!,
+  process.env.VAPID_PRIVATE_KEY!,
+);
 
 function combineDateTime(date: Date, time: string) {
   if (!time) return null;
@@ -20,17 +27,11 @@ function combineDateTime(date: Date, time: string) {
 export async function POST() {
   console.log("=== PROCESS EVENTS ROUTE CALLED ===");
   try {
-    console.log("Getting database connection...");
     const db = await getDB();
-    console.log("Database connected successfully");
 
     const now = new Date();
     const windowEnd = new Date(now.getTime() + 60 * 1000);
 
-    console.log("Current time (server):", now.toISOString());
-    console.log("Window end:", windowEnd.toISOString());
-
-    console.log("Querying todos...");
     const todos = await db
       .collection("todos")
       .find({
@@ -38,32 +39,26 @@ export async function POST() {
       })
       .toArray();
 
-    console.log(`Found ${todos.length} incomplete todos`);
+    const startingTodos = [];
 
     for (const todo of todos) {
-      console.log(`Processing todo: ${todo.title}`);
-      console.log(`  Date: ${todo.date}, FromTime: ${todo.fromTime}`);
-
       if (!todo.fromTime || !todo.date) {
-        console.log("  Skipping: missing date or fromTime");
         continue;
       }
 
       const eventTime = combineDateTime(todo.date, todo.fromTime);
-      console.log(`  Event time calculated: ${eventTime?.toISOString()}`);
 
-      if (!eventTime) {
-        console.log("  Skipping: could not calculate event time");
-        continue;
-      }
-
-      console.log(
-        `  Event time >= now: ${eventTime >= now}, Event time <= windowEnd: ${eventTime <= windowEnd}`,
-      );
+      if (!eventTime) continue;
 
       if (eventTime >= now && eventTime <= windowEnd) {
-        console.log("✓ TODO STARTING:", todo.title);
+        startingTodos.push(todo);
       }
+    }
+
+    if (startingTodos.length > 0) {
+      startingTodos.forEach((todo) => {
+        console.log("✓ TODO STARTING:", todo.title);
+      });
     }
 
     console.log("=== PROCESS EVENTS COMPLETED ===");
