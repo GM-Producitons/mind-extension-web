@@ -30,24 +30,26 @@ export async function POST() {
     const db = await getDB();
 
     const now = new Date();
-    const windowEnd = new Date(now.getTime() + 60 * 1000);
+    const windowEnd = new Date(now.getTime() + 60 * 1000); // 1 minute window
 
+    // 1️⃣ Get all incomplete todos
     const todos = await db
       .collection("todos")
-      .find({
-        completed: false,
-      })
+      .find({ completed: false })
+      .toArray();
+
+    // 2️⃣ Get all subscriptions
+    const subscriptions = await db
+      .collection("pushSubscriptions")
+      .find()
       .toArray();
 
     const startingTodos = [];
 
     for (const todo of todos) {
-      if (!todo.fromTime || !todo.date) {
-        continue;
-      }
+      if (!todo.fromTime || !todo.date) continue;
 
       const eventTime = combineDateTime(todo.date, todo.fromTime);
-
       if (!eventTime) continue;
 
       if (eventTime >= now && eventTime <= windowEnd) {
@@ -55,25 +57,30 @@ export async function POST() {
       }
     }
 
-    if (startingTodos.length > 0) {
-      startingTodos.forEach((todo) => {
-        console.log("✓ TODO STARTING:", todo.title);
-      });
+    // 3️⃣ Send notifications
+    for (const todo of startingTodos) {
+      console.log("✓ TODO STARTING:", todo.title);
+
+      for (const sub of subscriptions) {
+        try {
+          await webpush.sendNotification(
+            sub as any,
+            JSON.stringify({
+              title: "MindExtension Reminder",
+              body: todo.title,
+              icon: "/icon-192x192.png",
+            }),
+          );
+        } catch (err) {
+          console.error("Error sending push to subscription:", err);
+        }
+      }
     }
 
     console.log("=== PROCESS EVENTS COMPLETED ===");
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, todos: startingTodos.length });
   } catch (error) {
-    console.error("=== CRON ERROR ===");
-    console.error(
-      "Error type:",
-      error instanceof Error ? error.name : typeof error,
-    );
-    console.error(
-      "Error message:",
-      error instanceof Error ? error.message : String(error),
-    );
-    console.error("Full error:", error);
+    console.error("=== CRON ERROR ===", error);
     return NextResponse.json({ ok: false, error: String(error) });
   }
 }
