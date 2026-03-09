@@ -26,6 +26,7 @@ function getTimeFromDate() {
 
 export default function AverageBus() {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [entry, setEntry] = useState<BusEntry>({
     type: "go",
     period: 1,
@@ -40,10 +41,14 @@ export default function AverageBus() {
   };
 
   const handleSubmit = async () => {
-    // Handle the entry submission here
-    await addBusEntry(entry);
-    console.log("Entry submitted:", entry);
-    setOpen(false);
+    setLoading(true);
+    try {
+      await addBusEntry(entry);
+      console.log("Entry submitted:", entry);
+      setOpen(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -167,8 +172,8 @@ export default function AverageBus() {
             </div>
           </div>
 
-          <Button onClick={handleSubmit} className="w-full">
-            Submit Entry
+          <Button onClick={handleSubmit} disabled={loading} className="w-full">
+            {loading ? "Submitting..." : "Submit Entry"}
           </Button>
         </div>
       </PopoverContent>
