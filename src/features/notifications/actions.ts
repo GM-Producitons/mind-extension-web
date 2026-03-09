@@ -22,7 +22,7 @@ export async function sendPush(todo: { title: string; body?: string }) {
 
   for (const sub of subscriptions) {
     await webpush.sendNotification(
-      sub,
+      sub as any,
       JSON.stringify({
         title: todo.title,
         body: todo.body || "Task is starting now",
