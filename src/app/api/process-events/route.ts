@@ -12,7 +12,9 @@ function combineDateTime(date: Date, time: string) {
   combined.setSeconds(0);
   combined.setMilliseconds(0);
 
-  return combined;
+  // Convert from Cairo time (UTC+2) to UTC
+  const cairoOffset = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+  return new Date(combined.getTime() - cairoOffset);
 }
 
 export async function POST() {
