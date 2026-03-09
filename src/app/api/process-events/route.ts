@@ -2,6 +2,8 @@ import { getDB } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 function combineDateTime(date: Date, time: string) {
+  if (!time) return null;
+
   const [hours, minutes] = time.split(":").map(Number);
 
   const combined = new Date(date);
@@ -18,7 +20,7 @@ export async function POST() {
     const db = await getDB();
 
     const now = new Date();
-    const windowEnd = new Date(now.getTime() + 60 * 1000); // next 1 minute
+    const windowEnd = new Date(now.getTime() + 60 * 1000);
 
     const todos = await db
       .collection("todos")
@@ -28,7 +30,13 @@ export async function POST() {
       .toArray();
 
     for (const todo of todos) {
+      if (!todo.fromTime || !todo.date) {
+        continue;
+      }
+
       const eventTime = combineDateTime(todo.date, todo.fromTime);
+
+      if (!eventTime) continue;
 
       if (eventTime >= now && eventTime <= windowEnd) {
         console.log("TODO STARTING:", todo.title);
