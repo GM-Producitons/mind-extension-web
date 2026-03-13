@@ -8,7 +8,7 @@ export default function BackgroundProvider({
     <div className="min-h-screen w-full bg-zinc-900 relative">
       {/* Royal Purple Background */}
       <div
-        className="absolute inset-0 z-0 pointer-events-none"
+        className="absolute inset-0 z-0"
         style={{
           backgroundImage: `
         radial-gradient(circle at 50% 50%, 
