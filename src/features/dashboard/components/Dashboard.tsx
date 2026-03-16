@@ -220,9 +220,9 @@ export default function Dashboard() {
       <div className="p-4 sm:p-20 pt-16 w-full min-h-screen bg-background">
         {/* Conditional rendering based on screen size */}
         {isMobile ? (
-            <Card className="p-3 border border-border/30">
+          <Card className="p-3 border border-border/30">
             <MobileCardLayout />
-            </Card>
+          </Card>
         ) : (
           <DesktopCardLayout />
         )}

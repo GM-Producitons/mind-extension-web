@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import router, { useRouter } from "next/router";
+import router, { useRouter } from "next/navigation";
 import {
   Settings,
   LayoutDashboard,
@@ -29,6 +29,7 @@ export default function SettingsButton() {
   const buttonRef = useRef(null);
   const pressTimeRef = useRef(0);
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -84,6 +85,7 @@ export default function SettingsButton() {
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault(); // prevent the synthetic click event from firing after touch
     const pressDuration = Date.now() - pressTimeRef.current;
     // Only toggle menu on quick taps (less than 150ms), not on holds
     if (pressDuration < 150) {
@@ -92,7 +94,7 @@ export default function SettingsButton() {
   };
 
   return (
-    <Draggable nodeRef={buttonRef}>
+    <Draggable nodeRef={buttonRef} cancel="button">
       <div
         ref={buttonRef}
         className="fixed z-50"
