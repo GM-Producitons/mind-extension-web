@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import ClientProviders from "@/components/clientProvider";
 import "./globals.css";
 import SettingsButton from "@/components/SettingsButton";
-import ServiceWorkerRegister from "@/features/notifications/ServiceWorkerRegister";
+// import ServiceWorkerRegister from "@/features/notifications/ServiceWorkerRegister";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -35,7 +35,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased w-full h-full`}
       >
-        <ServiceWorkerRegister />
+        {/* <ServiceWorkerRegister /> */}
         <ClientProviders>
           {children}
           <SettingsButton />
