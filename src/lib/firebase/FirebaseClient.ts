@@ -9,7 +9,11 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const serviceAccount = JSON.parse(
+  process.env.FIREBASE_SERVICE_ACCOUNT as string,
+);
+
+const app = getApps().length ? getApps()[0] : initializeApp(serviceAccount);
 
 export async function getFirebaseMessaging() {
   if (typeof window === "undefined") return null;

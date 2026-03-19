@@ -17,19 +17,33 @@ export async function POST() {
     .toArray();
 
   const user = await db.collection("users").findOne({ isMe: true });
-  for (const task of tasks) {
-    if (!user?.client_tokens?.length) continue;
+  if (!user) return Response.json({ ok: false, error: "User not found" });
 
-    await firebaseMessaging.sendEachForMulticast({
-      tokens: user.client_tokens,
-      webpush: {
+  for (const task of tasks) {
+    // Send to desktop/browser tokens
+    if (user.client_tokens?.length) {
+      await firebaseMessaging.sendEachForMulticast({
+        tokens: user.client_tokens,
+        webpush: {
+          notification: {
+            title: "MindExtension",
+            body: task.title,
+            icon: "/icon.png",
+          },
+        },
+      });
+    }
+
+    // Send to phone/mobile tokens
+    if (user.phone_tokens?.length) {
+      await firebaseMessaging.sendEachForMulticast({
+        tokens: user.phone_tokens,
         notification: {
           title: "MindExtension",
           body: task.title,
-          icon: "/icon.png",
         },
-      },
-    });
+      });
+    }
 
     // mark notification as sent
     await db
