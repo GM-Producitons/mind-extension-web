@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { getFCMToken } from "./getToken";
+import { getFCMToken } from "../getToken";
 
 export default function TestFCMButton() {
   async function handleClick() {

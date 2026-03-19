@@ -24,46 +24,47 @@ import { generateToken } from "@/lib/auth-utils";
 
 // Login: verify password → create JWT → set httpOnly cookie
 export async function loginUser(email: string, password: string) {
-    try {
-        const db = await getDB();
-        const user = await db
-            .collection("users")
-            .findOne({ email: email });
+  try {
+    const db = await getDB();
+    const user = await db.collection("users").findOne({ email: email });
 
-        if (!user) {
-            return { success: false, error: "انت مين يخول" };
-        }
-
-        const isPasswordValid = await compareHash(password, user.password);
-        if (!isPasswordValid) {
-            return { success: false, error: "غلط, حطه صح" };
-        }
-
-        const token = await generateToken({
-            userId: user._id.toString(),
-            email: user.email,
-        });
-
-        // Set httpOnly cookie server-side — can't be read/stolen by JS
-        const cookieStore = await cookies();
-        cookieStore.set("auth-token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            path: "/",
-            maxAge: 7 * 24 * 60 * 60, // 7 days
-        });
-
-        return { success: true };
-    } catch (error) {
-        console.error("Error logging in:", error);
-        return { success: false, error: "Login failed" };
+    if (!user) {
+      return { success: false, error: "انت مين يخول" };
     }
+
+    const isPasswordValid = await compareHash(password, user.password);
+    if (!isPasswordValid) {
+      return { success: false, error: "غلط, حطه صح" };
+    }
+
+    const token = await generateToken({
+      userId: user._id.toString(),
+      email: user.email,
+    });
+
+    // Set httpOnly cookie server-side — can't be read/stolen by JS
+    const cookieStore = await cookies();
+    cookieStore.set("auth-token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+
+    const returnUser = JSON.parse(JSON.stringify(user));
+    delete returnUser.password;
+
+    return { success: true, user: returnUser };
+  } catch (error) {
+    console.error("Error logging in:", error);
+    return { success: false, error: "Login failed" };
+  }
 }
 
 // Logout: delete the cookie
 export async function logoutUser() {
-    const cookieStore = await cookies();
-    cookieStore.delete("auth-token");
-    return { success: true };
+  const cookieStore = await cookies();
+  cookieStore.delete("auth-token");
+  return { success: true };
 }

@@ -1,3 +1,3 @@
-import TestFCMButton from "@/features/notifications/testTempComp";
+import TestFCMButton from "@/features/notifications/test/testTempComp";
 
 export default TestFCMButton;

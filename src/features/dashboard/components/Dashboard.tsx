@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { Brain, Zap, Eye } from "lucide-react";
 import { ReactNode, useState, useEffect } from "react";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import PrayerTime from "@/features/prayerTime/components/PrayerTime";
-import { Lumiflex } from "uvcanvas";
+import { Card } from "@/components/ui/card";
 import BackgroundProvider from "@/components/BackgroundProvider";
 
 interface SubApp {
@@ -214,6 +212,19 @@ function MobileCardLayout() {
 
 export default function Dashboard() {
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/firebase-messaging-sw.js")
+        .then((registration) => {
+          console.log("Service Worker registered:", registration);
+        })
+        .catch((err) => {
+          console.error("Service Worker registration failed:", err);
+        });
+    }
+  }, []);
 
   return (
     <BackgroundProvider>
