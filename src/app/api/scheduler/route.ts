@@ -1,30 +1,37 @@
 import { getDB } from "@/lib/db";
 import { firebaseMessaging } from "@/lib/firebase/FirebaseAdmin";
 
+function getCurrentTimeString(date: Date) {
+  return date.toTimeString().slice(0, 5); // "HH:mm"
+}
+
 export async function POST() {
   const now = new Date();
 
   const db = await getDB();
-  db
-    ? console.log("Connected to MongoDB for scheduler")
-    : console.log("no db :(");
-  const tasks = await db
+
+  const currentTime = getCurrentTimeString(now);
+  const prevMinute = getCurrentTimeString(new Date(now.getTime() - 60000));
+
+  const specificTasks = await db
     .collection("todos")
     .find({
       fromTime: {
-        $lte: now,
-        $gt: new Date(now.getTime() - 60000),
+        $lte: currentTime,
+        $gt: prevMinute,
       },
       notificationSent: { $ne: true },
     })
     .toArray();
-  tasks.length > 0
-    ? console.log(`Found ${tasks.length} tasks to send notifications for`)
-    : console.log("No tasks found for notification");
+  specificTasks.length > 0
+    ? console.log(
+        `Found ${specificTasks.length} specificTasks to send notifications for`,
+      )
+    : console.log("No specificTasks found for notification");
   const user = await db.collection("users").findOne({ isMe: true });
   if (!user) return Response.json({ ok: false, error: "User not found" });
 
-  for (const task of tasks) {
+  for (const task of specificTasks) {
     // Send to desktop/browser tokens
     console.log(`Sending notification for task: ${task.title}`);
     if (user.client_tokens?.length) {
