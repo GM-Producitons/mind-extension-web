@@ -43,3 +43,35 @@ export const calculateDuration = (
 
   return endTotalMinutes - startTotalMinutes;
 };
+
+/**
+ * Converts a local time string with UTC offset to UTC time string
+ * @param timeStr - Time in HH:mm format (local time)
+ * @param utcOffset - UTC offset (e.g., 2 or 3 for Egypt)
+ * @returns Time in HH:mm format (UTC time)
+ */
+export function convertLocalToUtcTime(
+  timeStr: string,
+  utcOffset: number,
+): string {
+  const [hours, minutes] = timeStr.split(":").map(Number);
+
+  // Calculate total minutes
+  const totalMinutes = hours * 60 + minutes;
+
+  // Subtract offset hours to get UTC time
+  const utcMinutes = totalMinutes - utcOffset * 60;
+
+  // Handle day wrapping
+  let utcTotalMinutes = utcMinutes;
+  if (utcTotalMinutes < 0) {
+    utcTotalMinutes += 24 * 60; // Add a day
+  } else if (utcTotalMinutes >= 24 * 60) {
+    utcTotalMinutes -= 24 * 60; // Subtract a day
+  }
+
+  const utcHours = Math.floor(utcTotalMinutes / 60);
+  const utcMins = utcTotalMinutes % 60;
+
+  return `${String(utcHours).padStart(2, "0")}:${String(utcMins).padStart(2, "0")}`;
+}

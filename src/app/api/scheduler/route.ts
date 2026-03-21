@@ -1,37 +1,61 @@
 import { getDB } from "@/lib/db";
 import { firebaseMessaging } from "@/lib/firebase/FirebaseAdmin";
 
-function getCurrentTimeString(date: Date) {
-  return date.toTimeString().slice(0, 5); // "HH:mm"
-}
-
 export async function POST() {
   const now = new Date();
 
   const db = await getDB();
 
-  const currentTime = getCurrentTimeString(now);
-  const prevMinute = getCurrentTimeString(new Date(now.getTime() - 60000));
+  const user = await db.collection("users").findOne({ isMe: true });
+  if (!user) return Response.json({ ok: false, error: "User not found" });
+
+  const utcOffset = user?.utcOffset ?? 2;
+
+  // Get current time and date in user's local timezone
+  const userLocalTime = new Date(now.getTime() + utcOffset * 3600000);
+  const userLocalDateString = userLocalTime.toISOString().split("T")[0]; // e.g., "2026-03-19"
+  const userLocalTimeString = userLocalTime.toTimeString().slice(0, 5); // e.g., "15:01"
+  const userLocalPrevMinute = new Date(
+    now.getTime() - 60000 + utcOffset * 3600000,
+  )
+    .toTimeString()
+    .slice(0, 5); // Previous minute in user's local time
 
   const specificTasks = await db
     .collection("todos")
     .find({
-      fromTime: {
-        $lte: currentTime,
-        $gt: prevMinute,
-      },
       notificationSent: { $ne: true },
     })
     .toArray();
-  specificTasks.length > 0
-    ? console.log(
-        `Found ${specificTasks.length} specificTasks to send notifications for`,
-      )
-    : console.log("No specificTasks found for notification");
-  const user = await db.collection("users").findOne({ isMe: true });
-  if (!user) return Response.json({ ok: false, error: "User not found" });
 
-  for (const task of specificTasks) {
+  // Filter tasks that match:
+  // 1. Task's local date matches user's local date today
+  // 2. Task's utcFromTime matches current UTC time window
+  const tasksToNotify = specificTasks.filter((task) => {
+    // Convert task's stored UTC date to user's local date
+    const taskLocalDate = new Date(task.date.getTime() + utcOffset * 3600000)
+      .toISOString()
+      .split("T")[0]; // e.g., "2026-03-19"
+
+    // Check if task's local date matches today's local date
+    if (taskLocalDate !== userLocalDateString) {
+      return false;
+    }
+
+    // Check if current UTC time matches the scheduled time
+    const currentTime = userLocalTime.toTimeString().slice(0, 5); // Use local time for comparison
+    return task.utcFromTime && currentTime === task.utcFromTime;
+  });
+
+  if (tasksToNotify.length > 0) {
+    console.log(
+      `Found ${tasksToNotify.length} tasks to send notifications for`,
+    );
+  } else {
+    console.log("No tasks found for notification");
+  }
+
+  for (const task of tasksToNotify) {
     // Send to desktop/browser tokens
     console.log(`Sending notification for task: ${task.title}`);
     if (user.client_tokens?.length) {

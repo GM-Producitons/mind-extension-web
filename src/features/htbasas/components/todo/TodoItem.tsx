@@ -102,7 +102,7 @@ export const TodoItem = ({
       />
       <div className="flex-1 min-w-0">
         <p
-          className={`font-medium text-sm sm:text-base break-words ${
+          className={`font-medium text-sm sm:text-base wrap-break-words ${
             todo.completed
               ? "line-through text-muted-foreground"
               : "text-foreground"

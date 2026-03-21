@@ -50,3 +50,20 @@ export async function savePhoneTokenAction(token: string) {
     return { success: false, error: "Failed to save phone token" };
   }
 }
+
+export async function updateUserTimezoneOffsetAction(utcOffset: number) {
+  try {
+    const userId = await getAuthenticatedUserId();
+    if (!userId) throw new Error("Not authenticated");
+    if (![2, 3].includes(utcOffset)) throw new Error("Invalid UTC offset");
+
+    const db = await getDB();
+    await db
+      .collection("users")
+      .updateOne({ _id: new ObjectId(userId) }, { $set: { utcOffset } });
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating timezone offset:", error);
+    return { success: false, error: "Failed to update timezone offset" };
+  }
+}

@@ -17,7 +17,7 @@ import {
   Sun,
   Bell,
 } from "lucide-react";
-import { NotificationModal } from "@/features/notifications/NotificationModal";
+import { SettingsModal } from "@/features/settings/SettingsModal";
 
 interface App {
   name: string;
@@ -230,7 +230,7 @@ export default function SettingsButton() {
           </div>
         </div>
       </Draggable>
-      <NotificationModal
+      <SettingsModal
         isOpen={notificationModalOpen}
         onClose={() => setNotificationModalOpen(false)}
       />

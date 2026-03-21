@@ -8,6 +8,7 @@ interface User {
   isMe?: boolean;
   client_tokens?: string[];
   phone_tokens?: string[];
+  utcOffset?: number;
 }
 
 interface UserState {
