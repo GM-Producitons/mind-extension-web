@@ -28,9 +28,6 @@ export async function POST() {
     })
     .toArray();
 
-  // Filter tasks that match:
-  // 1. Task's local date matches user's local date today
-  // 2. Task's utcFromTime matches current UTC time window
   const tasksToNotify = specificTasks.filter((task) => {
     // Convert task's stored UTC date to user's local date
     const taskLocalDate = new Date(task.date.getTime() + utcOffset * 3600000)
@@ -43,8 +40,8 @@ export async function POST() {
     }
 
     // Check if current UTC time matches the scheduled time
-    const currentTime = userLocalTime.toTimeString().slice(0, 5); // Use local time for comparison
-    return task.utcFromTime && currentTime === task.utcFromTime;
+    const currentUtcTime = now.toTimeString().slice(0, 5); // Compare UTC to UTC
+    return task.utcFromTime && currentUtcTime === task.utcFromTime;
   });
 
   if (tasksToNotify.length > 0) {
