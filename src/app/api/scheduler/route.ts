@@ -43,45 +43,22 @@ async function sendNotificationForTask(
   }
 
   try {
-    const clientTokens = Array.from(new Set(user.client_tokens ?? []));
-    const phoneTokens = Array.from(new Set(user.phone_tokens ?? [])).filter(
-      (token) => !clientTokens.includes(token),
+    const allTokens = Array.from(
+      new Set([...(user.client_tokens ?? []), ...(user.phone_tokens ?? [])]),
     );
 
-    // Send to desktop/browser tokens
     console.log(`Sending notification for task: ${task.title}`);
-    if (clientTokens.length) {
-      console.log(`Sending to client tokens: ${clientTokens}`);
-      await firebaseMessaging.sendEachForMulticast({
-        tokens: clientTokens,
-        webpush: {
-          notification: {
-            title: "MindExtension",
-            body: task.title,
-            icon: "/icon.png",
-            tag: `task-${String(task._id)}`,
-          },
-        },
-      });
-    }
+    console.log(`Sending to tokens: ${allTokens}`);
 
-    // Send to phone/mobile tokens
-    if (phoneTokens.length) {
-      console.log(`Sending to phone tokens: ${phoneTokens}`);
+    if (allTokens.length) {
       await firebaseMessaging.sendEachForMulticast({
-        tokens: phoneTokens,
+        tokens: allTokens,
         notification: {
           title: "MindExtension",
           body: task.title,
         },
-        webpush: {
-          notification: {
-            tag: `task-${String(task._id)}`,
-          },
-        },
       });
     }
-
     // Mark as sent only after successful delivery attempts.
     await db.collection("todos").updateOne(
       { _id: task._id },
