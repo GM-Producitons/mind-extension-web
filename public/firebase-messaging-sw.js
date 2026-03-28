@@ -16,7 +16,20 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  self.registration.showNotification(payload.notification.title, {
-    body: payload.notification.body,
+  // FCM may auto-display messages that already include a notification payload.
+  // Showing one manually here would cause duplicate notifications on some clients.
+  if (payload && payload.notification) {
+    return;
+  }
+
+  const title = payload?.data?.title || "MindExtension";
+  const body = payload?.data?.body || "";
+  const icon = payload?.data?.icon || "/icon.png";
+  const tag = payload?.data?.tag;
+
+  self.registration.showNotification(title, {
+    body,
+    icon,
+    tag,
   });
 });

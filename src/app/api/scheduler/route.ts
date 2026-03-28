@@ -43,30 +43,41 @@ async function sendNotificationForTask(
   }
 
   try {
+    const clientTokens = Array.from(new Set(user.client_tokens ?? []));
+    const phoneTokens = Array.from(new Set(user.phone_tokens ?? [])).filter(
+      (token) => !clientTokens.includes(token),
+    );
+
     // Send to desktop/browser tokens
     console.log(`Sending notification for task: ${task.title}`);
-    if (user.client_tokens?.length) {
-      console.log(`Sending to client tokens: ${user.client_tokens}`);
+    if (clientTokens.length) {
+      console.log(`Sending to client tokens: ${clientTokens}`);
       await firebaseMessaging.sendEachForMulticast({
-        tokens: user.client_tokens,
+        tokens: clientTokens,
         webpush: {
           notification: {
             title: "MindExtension",
             body: task.title,
             icon: "/icon.png",
+            tag: `task-${String(task._id)}`,
           },
         },
       });
     }
 
     // Send to phone/mobile tokens
-    if (user.phone_tokens?.length) {
-      console.log(`Sending to phone tokens: ${user.phone_tokens}`);
+    if (phoneTokens.length) {
+      console.log(`Sending to phone tokens: ${phoneTokens}`);
       await firebaseMessaging.sendEachForMulticast({
-        tokens: user.phone_tokens,
+        tokens: phoneTokens,
         notification: {
           title: "MindExtension",
           body: task.title,
+        },
+        webpush: {
+          notification: {
+            tag: `task-${String(task._id)}`,
+          },
         },
       });
     }
