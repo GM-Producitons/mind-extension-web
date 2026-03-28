@@ -150,34 +150,34 @@ export async function POST() {
   return Response.json({ ok: true });
 }
 
-export async function GET() {
-  const db = await getDB();
-  const user = (await db
-    .collection("users")
-    .findOne({ isMe: true })) as SchedulerUser | null;
-  if (!user) return Response.json({ ok: false, error: "User not found" });
-  const specificTasks = (await db
-    .collection<SchedulerTask>("todos")
-    .find({
-      notificationSent: { $ne: true },
-      notificationSending: { $ne: true },
-    })
-    .toArray()) as SchedulerTask[];
+// export async function GET() {
+//   const db = await getDB();
+//   const user = (await db
+//     .collection("users")
+//     .findOne({ isMe: true })) as SchedulerUser | null;
+//   if (!user) return Response.json({ ok: false, error: "User not found" });
+//   const specificTasks = (await db
+//     .collection<SchedulerTask>("todos")
+//     .find({
+//       notificationSent: { $ne: true },
+//       notificationSending: { $ne: true },
+//     })
+//     .toArray()) as SchedulerTask[];
 
-  const tasksToNotify = await filterTasksForNotification(specificTasks, user);
+//   const tasksToNotify = await filterTasksForNotification(specificTasks, user);
 
-  // debbuging logs
-  if (tasksToNotify.length > 0) {
-    console.log(
-      `Found ${tasksToNotify.length} tasks to send notifications for`,
-    );
-  } else {
-    console.log("No tasks found for notification");
-  }
+//   // debbuging logs
+//   if (tasksToNotify.length > 0) {
+//     console.log(
+//       `Found ${tasksToNotify.length} tasks to send notifications for`,
+//     );
+//   } else {
+//     console.log("No tasks found for notification");
+//   }
 
-  for (const task of tasksToNotify) {
-    await sendNotificationForTask(task, user, db);
-  }
+//   for (const task of tasksToNotify) {
+//     await sendNotificationForTask(task, user, db);
+//   }
 
-  return Response.json({ ok: true });
-}
+//   return Response.json({ ok: true });
+// }
