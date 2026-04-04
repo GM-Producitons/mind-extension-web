@@ -51,16 +51,24 @@ export async function addTodo(
 export async function addTTR(title: string, date: Date) {
   try {
     const db = await getDB();
+    const normalizedTitle = title.trim();
+    const normalizedTags = normalizeTags([]);
     const result = await db.collection("ttrs").insertOne({
-      title,
+      title: normalizedTitle,
       date: new Date(date),
+      tags: normalizedTags,
       createdAt: new Date(),
     });
 
     return JSON.parse(
       JSON.stringify({
         success: true,
-        ttr: { _id: result.insertedId, title, date },
+        ttr: {
+          _id: result.insertedId,
+          title: normalizedTitle,
+          date,
+          tags: normalizedTags,
+        },
       }),
     );
   } catch (error) {
@@ -70,6 +78,105 @@ export async function addTTR(title: string, date: Date) {
     );
   }
 }
+
+export async function addTTRWithTags(
+  title: string,
+  date: Date,
+  tags: string[],
+) {
+  try {
+    const db = await getDB();
+    const normalizedTitle = title.trim();
+    const normalizedTags = normalizeTags(tags);
+
+    const result = await db.collection("ttrs").insertOne({
+      title: normalizedTitle,
+      date: new Date(date),
+      tags: normalizedTags,
+      createdAt: new Date(),
+    });
+
+    return JSON.parse(
+      JSON.stringify({
+        success: true,
+        ttr: {
+          _id: result.insertedId,
+          title: normalizedTitle,
+          date,
+          tags: normalizedTags,
+        },
+      }),
+    );
+  } catch (error) {
+    console.error("Error adding TTR with tags:", error);
+    return JSON.parse(
+      JSON.stringify({ success: false, error: "Failed to add TTR" }),
+    );
+  }
+}
+
+export async function getUserTTRTags() {
+  try {
+    const db = await getDB();
+    const user = await db.collection("users").findOne({ isMe: true });
+    const tags = normalizeTags(
+      Array.isArray(user?.ttrTags) ? user.ttrTags : [],
+    );
+    return JSON.parse(JSON.stringify({ success: true, tags }));
+  } catch (error) {
+    console.error("Error fetching user TTR tags:", error);
+    return JSON.parse(
+      JSON.stringify({ success: false, error: "Failed to fetch user tags" }),
+    );
+  }
+}
+
+export async function createUserTTRTag(tag: string) {
+  try {
+    const db = await getDB();
+    const normalizedTag = tag.trim();
+
+    if (!normalizedTag) {
+      return JSON.parse(
+        JSON.stringify({ success: false, error: "Tag cannot be empty" }),
+      );
+    }
+
+    const user = await db.collection("users").findOne({ isMe: true });
+    if (!user) {
+      return JSON.parse(
+        JSON.stringify({ success: false, error: "User not found" }),
+      );
+    }
+
+    const currentTags = normalizeTags(
+      Array.isArray(user.ttrTags) ? user.ttrTags : [],
+    );
+    const hasTag = currentTags.some(
+      (existingTag) =>
+        existingTag.toLowerCase() === normalizedTag.toLowerCase(),
+    );
+
+    const nextTags = hasTag ? currentTags : [...currentTags, normalizedTag];
+
+    await db
+      .collection("users")
+      .updateOne({ _id: user._id }, { $set: { ttrTags: nextTags } });
+
+    return JSON.parse(JSON.stringify({ success: true, tags: nextTags }));
+  } catch (error) {
+    console.error("Error creating user TTR tag:", error);
+    return JSON.parse(
+      JSON.stringify({ success: false, error: "Failed to create tag" }),
+    );
+  }
+}
+
+const normalizeTags = (tags: string[]): string[] => {
+  return Array.from(
+    new Set(tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0)),
+  );
+};
 
 export async function getTodos() {
   try {

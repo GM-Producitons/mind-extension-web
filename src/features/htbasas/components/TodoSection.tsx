@@ -4,19 +4,17 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useTodoCRUD } from "./todo/useTodoCRUD";
 import { useTodoForm } from "./todo/useTodoForm";
 import { TodoForm } from "./todo/TodoForm";
 import { TodoItem } from "./todo/TodoItem";
-import {
-  calculateDuration,
-  calculateEndTime,
-  getLocalDateString,
-} from "./todo/utils";
+import { calculateDuration, getLocalDateString } from "./todo/utils";
 
 interface TodoItem {
   _id: string;
@@ -211,8 +209,8 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
         <h2 className="text-base sm:text-lg font-semibold text-foreground">
           To do's
         </h2>
-        <Popover open={todoOpen} onOpenChange={setTodoOpen}>
-          <PopoverTrigger asChild>
+        <Dialog open={todoOpen} onOpenChange={setTodoOpen}>
+          <DialogTrigger asChild>
             <Button
               size="sm"
               variant="outline"
@@ -222,10 +220,12 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
               <span className="hidden sm:inline">Add to do</span>
               <span className="sm:hidden">Add</span>
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80">
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
             <div className="space-y-4">
-              <h3 className="font-semibold text-foreground">Add a new to do</h3>
+              <DialogHeader>
+                <DialogTitle>Add a new to do</DialogTitle>
+              </DialogHeader>
               <TodoForm
                 title={addForm.todoTitle}
                 setTitle={addForm.setTodoTitle}
@@ -240,8 +240,8 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
                 submitLabel="Add to do"
               />
             </div>
-          </PopoverContent>
-        </Popover>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Todo list */}

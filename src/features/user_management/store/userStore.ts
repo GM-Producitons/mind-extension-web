@@ -9,6 +9,7 @@ interface User {
   client_tokens?: string[];
   phone_tokens?: string[];
   utcOffset?: number;
+  ttrTags?: string[];
 }
 
 interface UserState {

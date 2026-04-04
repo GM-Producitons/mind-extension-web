@@ -1,22 +1,23 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Input } from '@/components/ui/input';
-import { ArrowLeft } from 'lucide-react';
-import { getTTRs } from '../apis/actions';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft } from "lucide-react";
+import { getTTRs } from "../apis/actions";
 
 interface TTR {
   _id: string;
   title: string;
   date: string;
   createdAt: string;
+  tags?: string[];
 }
 
 const TTRBank = () => {
   const [ttrs, setTtrs] = useState<TTR[]>([]);
   const [filteredTtrs, setFilteredTtrs] = useState<TTR[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,18 +33,22 @@ const TTRBank = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = ttrs.filter((ttr) =>
-      ttr.title.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = ttrs.filter(
+      (ttr) =>
+        ttr.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (ttr.tags ?? []).some((tag) =>
+          tag.toLowerCase().includes(searchTerm.toLowerCase()),
+        ),
     );
     setFilteredTtrs(filtered);
   }, [searchTerm, ttrs]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
@@ -54,10 +59,14 @@ const TTRBank = () => {
         <Link href="/htbasas">
           <button className="p-1 sm:p-2 hover:bg-accent rounded-lg transition flex items-center gap-2">
             <ArrowLeft size={20} className="sm:w-6 sm:h-6" />
-            <span className="text-base sm:text-lg font-semibold text-foreground">Back</span>
+            <span className="text-base sm:text-lg font-semibold text-foreground">
+              Back
+            </span>
           </button>
         </Link>
-        <h1 className="text-xl sm:text-2xl font-bold text-foreground">TTR Bank</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+          TTR Bank
+        </h1>
         <div className="w-0 sm:w-10" />
       </div>
 
@@ -74,10 +83,12 @@ const TTRBank = () => {
       {/* TTRs List */}
       <div className="space-y-2 sm:space-y-3">
         {loading ? (
-          <p className="text-center text-muted-foreground text-sm sm:text-base">Loading...</p>
+          <p className="text-center text-muted-foreground text-sm sm:text-base">
+            Loading...
+          </p>
         ) : filteredTtrs.length === 0 ? (
           <p className="text-center text-muted-foreground py-8 text-sm sm:text-base">
-            {ttrs.length === 0 ? 'No TTRs found' : 'No TTRs match your search'}
+            {ttrs.length === 0 ? "No TTRs found" : "No TTRs match your search"}
           </p>
         ) : (
           filteredTtrs.map((ttr) => (
@@ -86,8 +97,24 @@ const TTRBank = () => {
               className="flex items-start gap-2 sm:gap-3 p-2 sm:p-4 bg-muted rounded-lg hover:bg-accent transition"
             >
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm sm:text-base text-foreground break-words">{ttr.title}</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">{formatDate(ttr.date)}</p>
+                <p className="font-medium text-sm sm:text-base text-foreground wrap-break-word">
+                  {ttr.title}
+                </p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  {formatDate(ttr.date)}
+                </p>
+                {!!ttr.tags?.length && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {ttr.tags.map((tag) => (
+                      <span
+                        key={`${ttr._id}-${tag}`}
+                        className="rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))
