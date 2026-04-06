@@ -5,6 +5,8 @@ import { Brain, Zap, Eye } from "lucide-react";
 import { ReactNode, useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import BackgroundProvider from "@/components/BackgroundProvider";
+import TimelineWrapper from "@/features/timeline/components/timelineWrapper";
+import TimelineWrapperPrototype from "@/features/timeline/components/timelineWrapperPrototype";
 
 interface SubApp {
   id: string;
@@ -229,15 +231,15 @@ export default function Dashboard() {
   return (
     <BackgroundProvider>
       <div className="p-4 sm:p-20 pt-16 w-full min-h-screen bg-background">
-        {/* Conditional rendering based on screen size */}
+        {/* Conditional rendering based on screen size
         {isMobile ? (
           <Card className="p-3 border border-border/30">
             <MobileCardLayout />
           </Card>
         ) : (
           <DesktopCardLayout />
-        )}
-
+        )} */}
+        <TimelineWrapperPrototype />
         {/* Apps Grid */}
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-6">Applications</h2>
