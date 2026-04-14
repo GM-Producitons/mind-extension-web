@@ -3,6 +3,7 @@ export interface TimelineSprint {
   color: string;
   title: string;
   start: Date;
+  type?: "sprint" | "marathon";
 }
 
 export interface PositionedSprint extends TimelineSprint {

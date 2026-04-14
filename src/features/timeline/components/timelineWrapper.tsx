@@ -10,6 +10,7 @@ export default function TimelineWrapper() {
       <div className="flex gap-10 w-full absolute">
         {Array.from({ length: events }).map((_, index) => (
           // <Block key={index} />
+          <span>m</span>
         ))}
       </div>
       {/* Gap */}

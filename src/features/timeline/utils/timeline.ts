@@ -1,6 +1,6 @@
 import { PositionedSprint, TimelineSprint } from "../models/sprint";
 
-export const DAY_WIDTH_PX = 32;
+export const DAY_WIDTH_PX = 48;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function normalizeDate(date: Date): Date {
