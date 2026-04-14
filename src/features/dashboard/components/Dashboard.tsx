@@ -4,9 +4,11 @@ import Link from "next/link";
 import { Brain, Zap, Eye } from "lucide-react";
 import { ReactNode, useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import BackgroundProvider from "@/components/BackgroundProvider";
-import TimelineWrapper from "@/features/timeline/components/timelineWrapper";
 import TimelineWrapperPrototype from "@/features/timeline/components/timelineWrapperPrototype";
+import GenTimeline from "@/features/timeline/components/GenTimeline";
 
 interface SubApp {
   id: string;
@@ -56,26 +58,6 @@ function renderAppCard(app: SubApp): ReactNode {
       </div>
     </Link>
   );
-}
-
-// Hook to detect if screen is mobile or desktop
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    // Set initial value
-    setIsMobile(window.innerWidth < 600);
-
-    // Handle resize
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 600);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return isMobile;
 }
 
 // Desktop layout - Original design (Row 1: 3-col grid, Row 2: 3-col grid)
@@ -213,7 +195,7 @@ function MobileCardLayout() {
 }
 
 export default function Dashboard() {
-  const isMobile = useIsMobile();
+  const [showGeneratedTimeline, setShowGeneratedTimeline] = useState(false);
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -239,7 +221,17 @@ export default function Dashboard() {
         ) : (
           <DesktopCardLayout />
         )} */}
-        <TimelineWrapperPrototype />
+        <div className="mb-3 flex items-center gap-2">
+          <Checkbox
+            id="toggle-generated-timeline"
+            checked={showGeneratedTimeline}
+            onCheckedChange={(checked) =>
+              setShowGeneratedTimeline(Boolean(checked))
+            }
+          />
+          <Label htmlFor="toggle-generated-timeline">Use GenTimeline</Label>
+        </div>
+        {showGeneratedTimeline ? <GenTimeline /> : <TimelineWrapperPrototype />}
         {/* Apps Grid */}
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-6">Applications</h2>

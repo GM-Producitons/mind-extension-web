@@ -9,7 +9,7 @@ export default function TimelineWrapper() {
       {/* ruler ticks */}
       <div className="flex gap-10 w-full absolute">
         {Array.from({ length: events }).map((_, index) => (
-          <Block key={index} />
+          // <Block key={index} />
         ))}
       </div>
       {/* Gap */}

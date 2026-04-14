@@ -1,0 +1,148 @@
+import { TimelineSprint } from "../models/sprint";
+
+export const dummySprints: TimelineSprint[] = [
+  {
+    title: "Read Sahih Bukhari",
+    color: "#16a34a",
+    start: new Date("2026-04-12"),
+    days: 10,
+  },
+  {
+    title: "Gym Discipline",
+    color: "#2563eb",
+    start: new Date("2026-04-14"),
+    days: 11,
+  },
+  {
+    title: "TypeScript Deep Dive",
+    color: "#db2777",
+    start: new Date("2026-04-16"),
+    days: 6,
+  },
+  {
+    title: "Quran Revision",
+    color: "#d97706",
+    start: new Date("2026-04-22"),
+    days: 5,
+  },
+  {
+    title: "Algorithm Sprint",
+    color: "#7c3aed",
+    start: new Date("2026-04-24"),
+    days: 9,
+  },
+  {
+    title: "Arabic Writing",
+    color: "#0f766e",
+    start: new Date("2026-04-18"),
+    days: 3,
+  },
+  {
+    title: "Fajr Streak",
+    color: "#ea580c",
+    start: new Date("2026-04-27"),
+    days: 8,
+  },
+  {
+    title: "No Sugar Challenge",
+    color: "#0284c7",
+    start: new Date("2026-04-30"),
+    days: 12,
+  },
+  {
+    title: "Book Notes",
+    color: "#4f46e5",
+    start: new Date("2026-05-03"),
+    days: 5,
+  },
+  {
+    title: "Morning Walk",
+    color: "#059669",
+    start: new Date("2026-05-05"),
+    days: 14,
+  },
+  {
+    title: "SQL Revision",
+    color: "#dc2626",
+    start: new Date("2026-05-08"),
+    days: 7,
+  },
+  {
+    title: "Deep Work Block",
+    color: "#7c2d12",
+    start: new Date("2026-05-11"),
+    days: 10,
+  },
+  {
+    title: "Memorization Sprint",
+    color: "#7e22ce",
+    start: new Date("2026-05-14"),
+    days: 9,
+  },
+  {
+    title: "Project Refactor",
+    color: "#0369a1",
+    start: new Date("2026-05-16"),
+    days: 13,
+  },
+  {
+    title: "Family Visits",
+    color: "#65a30d",
+    start: new Date("2026-05-18"),
+    days: 4,
+  },
+  {
+    title: "Algorithm Marathon",
+    color: "#b91c1c",
+    start: new Date("2026-05-20"),
+    days: 16,
+  },
+  {
+    title: "Arabic Grammar",
+    color: "#0d9488",
+    start: new Date("2026-05-24"),
+    days: 6,
+  },
+  {
+    title: "Sleep Reset",
+    color: "#9333ea",
+    start: new Date("2026-05-26"),
+    days: 11,
+  },
+  {
+    title: "Frontend Polish",
+    color: "#be185d",
+    start: new Date("2026-05-29"),
+    days: 7,
+  },
+  {
+    title: "Workout Volume",
+    color: "#15803d",
+    start: new Date("2026-06-01"),
+    days: 15,
+  },
+  {
+    title: "Quran Recitation",
+    color: "#ca8a04",
+    start: new Date("2026-06-04"),
+    days: 8,
+  },
+  {
+    title: "Backend Cleanup",
+    color: "#1d4ed8",
+    start: new Date("2026-06-07"),
+    days: 10,
+  },
+  {
+    title: "Weekly Planning",
+    color: "#0f766e",
+    start: new Date("2026-06-10"),
+    days: 5,
+  },
+  {
+    title: "Habit Audit",
+    color: "#c2410c",
+    start: new Date("2026-06-12"),
+    days: 9,
+  },
+];
