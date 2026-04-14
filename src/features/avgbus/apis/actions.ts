@@ -4,12 +4,39 @@ import { getDB } from "@/lib/db";
 import { BusEntry } from "../models/bus_entry";
 import { ObjectId } from "mongodb";
 
+function parseEntryTimeToDate(time: string): Date {
+  const [hoursStr, minutesStr] = time.split(":");
+  const hours = Number(hoursStr);
+  const minutes = Number(minutesStr);
+
+  if (
+    Number.isInteger(hours) &&
+    Number.isInteger(minutes) &&
+    hours >= 0 &&
+    hours <= 23 &&
+    minutes >= 0 &&
+    minutes <= 59
+  ) {
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    return date;
+  }
+
+  const parsed = new Date(time);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed;
+  }
+
+  throw new Error(`Invalid time value: ${time}`);
+}
+
 export async function addBusEntry(entry: BusEntry) {
   try {
     const db = await getDB();
+    const parsedTime = parseEntryTimeToDate(entry.time);
     const result = await db.collection("bus-entries").insertOne({
       ...entry,
-      time: new Date(entry.time),
+      time: parsedTime,
       createdAt: new Date(),
     });
 
