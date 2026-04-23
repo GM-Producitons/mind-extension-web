@@ -1,10 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { Brain, Zap, Eye } from "lucide-react";
-import { ReactNode, useState, useEffect } from "react";
+import { Brain, Zap, Eye, Plus } from "lucide-react";
+import { ReactNode, useState, useEffect, useTransition } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import BackgroundProvider from "@/components/BackgroundProvider";
+import GenTimeline from "@/features/timeline/components/GenTimeline";
+import type { TimelineEvent } from "@/features/timeline/models/timeline_event";
+import {
+  createTimelineEvent,
+  deleteTimelineEvent,
+  getTimelineEvents,
+  updateTimelineEvent,
+} from "@/features/timeline/apis/actions";
 
 interface SubApp {
   id: string;
@@ -54,26 +80,6 @@ function renderAppCard(app: SubApp): ReactNode {
       </div>
     </Link>
   );
-}
-
-// Hook to detect if screen is mobile or desktop
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    // Set initial value
-    setIsMobile(window.innerWidth < 600);
-
-    // Handle resize
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 600);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return isMobile;
 }
 
 // Desktop layout - Original design (Row 1: 3-col grid, Row 2: 3-col grid)
@@ -211,7 +217,22 @@ function MobileCardLayout() {
 }
 
 export default function Dashboard() {
-  const isMobile = useIsMobile();
+  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [isLoadingTimeline, setIsLoadingTimeline] = useState(true);
+  const [title, setTitle] = useState("");
+  const [start, setStart] = useState("");
+  const [days, setDays] = useState("7");
+  const [color, setColor] = useState("#7c3aed");
+  const [type, setType] = useState<"sprint" | "marathon" | "">("");
+  const [editingEventId, setEditingEventId] = useState("");
+  const [editTitle, setEditTitle] = useState("");
+  const [editStart, setEditStart] = useState("");
+  const [editDays, setEditDays] = useState("7");
+  const [editColor, setEditColor] = useState("#7c3aed");
+  const [editType, setEditType] = useState<"sprint" | "marathon" | "">("");
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -224,20 +245,334 @@ export default function Dashboard() {
           console.error("Service Worker registration failed:", err);
         });
     }
+
+    const loadTimelineEvents = async () => {
+      const result = await getTimelineEvents();
+
+      if (result.success && result.events) {
+        setTimelineEvents(
+          result.events.map((event: TimelineEvent & { start: string }) => ({
+            ...event,
+            start: new Date(event.start),
+          })),
+        );
+      }
+
+      setIsLoadingTimeline(false);
+    };
+
+    void loadTimelineEvents();
   }, []);
+
+  const handleCreateTimelineEvent = () => {
+    startTransition(async () => {
+      const result = await createTimelineEvent({
+        title,
+        start,
+        days: Number(days),
+        color,
+        type: type || undefined,
+      });
+
+      if (!result.success || !result.event) {
+        console.error(result.error ?? "Failed to create timeline event");
+        return;
+      }
+
+      setTimelineEvents((current) => [
+        ...current,
+        {
+          ...result.event,
+          start: new Date(result.event.start),
+        },
+      ]);
+
+      setAddDialogOpen(false);
+      setTitle("");
+      setStart("");
+      setDays("7");
+      setColor("#7c3aed");
+      setType("");
+    });
+  };
+
+  const handleOpenEditDialog = (event: TimelineEvent) => {
+    setEditingEventId(event._id ?? "");
+    setEditTitle(event.title);
+    setEditDays(String(event.days));
+    setEditColor(event.color);
+    setEditType(event.type ?? "");
+    setEditStart(event.start.toISOString().slice(0, 10));
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveTimelineEvent = () => {
+    if (!editingEventId) {
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await updateTimelineEvent({
+        eventId: editingEventId,
+        title: editTitle,
+        start: editStart,
+        days: Number(editDays),
+        color: editColor,
+        type: editType || undefined,
+      });
+
+      if (!result.success || !result.event) {
+        console.error(result.error ?? "Failed to update timeline event");
+        return;
+      }
+
+      setTimelineEvents((current) =>
+        current.map((event) =>
+          event._id === editingEventId
+            ? {
+                ...result.event,
+                start: new Date(result.event.start),
+              }
+            : event,
+        ),
+      );
+
+      setEditDialogOpen(false);
+    });
+  };
+
+  const handleDeleteTimelineEvent = () => {
+    if (!editingEventId) {
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await deleteTimelineEvent(editingEventId);
+
+      if (!result.success) {
+        console.error(result.error ?? "Failed to delete timeline event");
+        return;
+      }
+
+      setTimelineEvents((current) =>
+        current.filter((event) => event._id !== editingEventId),
+      );
+      setEditDialogOpen(false);
+    });
+  };
 
   return (
     <BackgroundProvider>
       <div className="p-4 sm:p-20 pt-16 w-full min-h-screen bg-background">
-        {/* Conditional rendering based on screen size */}
-        {isMobile ? (
-          <Card className="p-3 border border-border/30">
-            <MobileCardLayout />
+        <div className="mb-3 flex items-center justify-end gap-2">
+          <Button
+            size="sm"
+            className="gap-2"
+            onClick={() => setAddDialogOpen(true)}
+          >
+            <Plus className="size-4" />
+            Add event
+          </Button>
+        </div>
+        {isLoadingTimeline ? (
+          <Card className="flex h-40 items-center justify-center text-muted-foreground">
+            Loading timeline...
           </Card>
         ) : (
-          <DesktopCardLayout />
+          <GenTimeline
+            events={timelineEvents}
+            onEventClick={handleOpenEditDialog}
+          />
         )}
 
+        <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+          <DialogContent className="sm:max-w-xl">
+            <DialogHeader>
+              <DialogTitle>Add timeline event</DialogTitle>
+              <DialogDescription>
+                Create a sprint or marathon and send it straight into the final
+                timeline.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-2">
+              <div className="grid gap-2">
+                <Label htmlFor="timeline-title">Title</Label>
+                <Input
+                  id="timeline-title"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  placeholder="Read a book, run a sprint, finish a marathon"
+                />
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-3">
+                <div className="grid gap-2">
+                  <Label htmlFor="timeline-start">Start</Label>
+                  <Input
+                    id="timeline-start"
+                    type="date"
+                    value={start}
+                    onChange={(event) => setStart(event.target.value)}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="timeline-days">Days</Label>
+                  <Input
+                    id="timeline-days"
+                    type="number"
+                    min="1"
+                    value={days}
+                    onChange={(event) => setDays(event.target.value)}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="timeline-color">Color</Label>
+                  <Input
+                    id="timeline-color"
+                    type="color"
+                    value={color}
+                    onChange={(event) => setColor(event.target.value)}
+                    className="h-9 w-full p-1"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="timeline-type">Type</Label>
+                <Select
+                  value={type}
+                  onValueChange={(value) => setType(value as typeof type)}
+                >
+                  <SelectTrigger id="timeline-type" className="w-full">
+                    <SelectValue placeholder="Auto-detect from days" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sprint">Sprint</SelectItem>
+                    <SelectItem value="marathon">Marathon</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setAddDialogOpen(false)}
+                type="button"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateTimelineEvent}
+                disabled={isPending || !title.trim() || !start || !days}
+                type="button"
+              >
+                {isPending ? "Creating..." : "Create event"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="sm:max-w-xl">
+            <DialogHeader>
+              <DialogTitle>Edit timeline event</DialogTitle>
+              <DialogDescription>
+                Update the selected timeline event or delete it.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-2">
+              <div className="grid gap-2">
+                <Label htmlFor="timeline-edit-title">Title</Label>
+                <Input
+                  id="timeline-edit-title"
+                  value={editTitle}
+                  onChange={(event) => setEditTitle(event.target.value)}
+                />
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-3">
+                <div className="grid gap-2">
+                  <Label htmlFor="timeline-edit-start">Start</Label>
+                  <Input
+                    id="timeline-edit-start"
+                    type="date"
+                    value={editStart}
+                    onChange={(event) => setEditStart(event.target.value)}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="timeline-edit-days">Days</Label>
+                  <Input
+                    id="timeline-edit-days"
+                    type="number"
+                    min="1"
+                    value={editDays}
+                    onChange={(event) => setEditDays(event.target.value)}
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="timeline-edit-color">Color</Label>
+                  <Input
+                    id="timeline-edit-color"
+                    type="color"
+                    value={editColor}
+                    onChange={(event) => setEditColor(event.target.value)}
+                    className="h-9 w-full p-1"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="timeline-edit-type">Type</Label>
+                <Select
+                  value={editType}
+                  onValueChange={(value) =>
+                    setEditType(value as typeof editType)
+                  }
+                >
+                  <SelectTrigger id="timeline-edit-type" className="w-full">
+                    <SelectValue placeholder="Auto-detect from days" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sprint">Sprint</SelectItem>
+                    <SelectItem value="marathon">Marathon</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteTimelineEvent}
+                disabled={isPending || !editingEventId}
+                type="button"
+              >
+                Delete
+              </Button>
+              <Button
+                onClick={handleSaveTimelineEvent}
+                disabled={
+                  isPending ||
+                  !editingEventId ||
+                  !editTitle.trim() ||
+                  !editStart ||
+                  !editDays
+                }
+                type="button"
+              >
+                {isPending ? "Saving..." : "Save"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         {/* Apps Grid */}
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-6">Applications</h2>

@@ -26,6 +26,7 @@ interface TodoFormProps {
   isLoading?: boolean;
   submitLabel?: string;
   onCancel?: () => void;
+  onDelete?: any;
   showCancel?: boolean;
 }
 
@@ -55,6 +56,7 @@ export const TodoForm = ({
   isLoading = false,
   submitLabel = "Add to do",
   onCancel,
+  onDelete,
   showCancel = false,
 }: TodoFormProps) => {
   const endTime = calculateEndTime(fromTime, duration);
@@ -137,6 +139,16 @@ export const TodoForm = ({
             className="flex-1"
           >
             Cancel
+          </Button>
+        )}
+        {showCancel && (
+          <Button
+            onClick={onCancel}
+            disabled={isLoading}
+            variant="destructive"
+            className="flex-1"
+          >
+            delete
           </Button>
         )}
       </div>
