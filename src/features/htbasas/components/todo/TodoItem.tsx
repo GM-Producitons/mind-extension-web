@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { EllipsisVertical } from "lucide-react";
 import { TodoForm } from "./TodoForm";
 import { calculateDuration } from "./utils";
-
+import { deleteTodo } from "../../apis/actions";
 interface TodoItem {
   _id: string;
   title: string;
@@ -48,6 +48,10 @@ const formatDate = (dateString: string) => {
     day: "numeric",
   });
 };
+// kosom el 7ekoma
+const onDelete = async (todoId: string) => {
+  await deleteTodo(todoId);
+};
 
 export const TodoItem = ({
   todo,
@@ -82,6 +86,7 @@ export const TodoItem = ({
           isLoading={isLoading}
           submitLabel="Save"
           onCancel={onCancelEdit}
+          onDelete={onDelete}
           showCancel={true}
         />
       </div>

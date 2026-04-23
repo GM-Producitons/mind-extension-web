@@ -1,12 +1,8 @@
-export interface TimelineSprint {
-  days: number;
-  color: string;
-  title: string;
-  start: Date;
-  type?: "sprint" | "marathon";
-}
+import type { TimelineEvent } from "./timeline_event";
 
-export interface PositionedSprint extends TimelineSprint {
+export interface TimelineSprint extends TimelineEvent {}
+
+export interface PositionedSprint extends TimelineEvent {
   lane: number;
   startDayIndex: number;
   endDayIndexExclusive: number;

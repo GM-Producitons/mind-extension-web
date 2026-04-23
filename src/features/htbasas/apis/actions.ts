@@ -4,6 +4,19 @@ import { getDB } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import { convertLocalToUtcTime } from "../components/todo/utils";
 
+export async function deleteTodo(todoId: string) {
+  try {
+    const db = await getDB();
+    const user = db.collection("users").find({ isMe: true });
+    const deletedTodo = db
+      .collection("todos")
+      .deleteOne({ _id: new ObjectId(todoId) });
+    return JSON.parse(JSON.stringify({ success: true, deletedTodo }));
+  } catch (error) {
+    console.error("Error deleting todo: ", error);
+  }
+}
+
 export async function addTodo(
   title: string,
   date: Date,

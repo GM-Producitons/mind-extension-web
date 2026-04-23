@@ -1,6 +1,6 @@
-import { TimelineSprint } from "../models/sprint";
+import type { TimelineEvent } from "../models/timeline_event";
 
-export const dummySprints: TimelineSprint[] = [
+export const dummySprints: TimelineEvent[] = [
   {
     title: "Read Sahih Bukhari",
     color: "#16a34a",
