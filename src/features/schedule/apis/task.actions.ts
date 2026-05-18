@@ -1,91 +1,41 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/auth-utils";
 import {
-  loadTasksForCurrentUser,
-  validateStoreAndReturnCreatedTaskForCurrentUser,
-  type CreateTaskInput,
-} from "../services/task.service";
+  createScheduleTaskRecord,
+  deleteTasksByMissionIdRecord,
+  addTaskIdToMission,
+} from "../../../../repositories/schedule.repository";
 
-async function getAuthenticatedUserId() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("auth-token")?.value;
-  if (!token) {
-    return null;
-  }
-
-  const payload = await verifyToken(token);
-  return payload?.userId ?? null;
-}
-
-export async function createTaskAction(input: CreateTaskInput) {
+export async function createScheduleTaskAction(data: {
+  missionId: string;
+  title: string;
+  date: Date;
+  fromTime?: string;
+  untilTime?: string;
+}) {
   try {
-    const userId = await getAuthenticatedUserId();
-    if (!userId) {
-      return JSON.parse(
-        JSON.stringify({
-          success: false,
-          task: null,
-          error: "Not authenticated",
-        }),
-      );
-    }
-
-    const result = await validateStoreAndReturnCreatedTaskForCurrentUser(
-      userId,
-      input,
-    );
-
-    return JSON.parse(
-      JSON.stringify({
-        success: result.success,
-        task: result.task ?? null,
-        error: result.error ?? null,
-      }),
-    );
+    const task = await createScheduleTaskRecord({
+      missionId: data.missionId,
+      title: data.title,
+      date: data.date,
+      fromTime: data.fromTime ?? "09:00",
+      utcFromTime: data.fromTime ?? "09:00",
+      untilTime: data.untilTime ?? "10:00",
+    });
+    await addTaskIdToMission(data.missionId, task._id);
+    return { success: true, task };
   } catch (error) {
-    console.error("Error creating task:", error);
-    return JSON.parse(
-      JSON.stringify({
-        success: false,
-        task: null,
-        error: "Failed to create task",
-      }),
-    );
+    console.error("Error creating schedule task:", error);
+    return { success: false, task: null, error: "Failed to create task" };
   }
 }
 
-export async function getTasksAction() {
+export async function deleteTasksByMissionIdAction(missionId: string) {
   try {
-    const userId = await getAuthenticatedUserId();
-    if (!userId) {
-      return JSON.parse(
-        JSON.stringify({
-          success: false,
-          tasks: null,
-          error: "Not authenticated",
-        }),
-      );
-    }
-
-    const result = await loadTasksForCurrentUser(userId);
-
-    return JSON.parse(
-      JSON.stringify({
-        success: result.success,
-        tasks: result.tasks ?? null,
-        error: result.error ?? null,
-      }),
-    );
+    const deletedCount = await deleteTasksByMissionIdRecord(missionId);
+    return { success: true, deletedCount };
   } catch (error) {
-    console.error("Error loading tasks:", error);
-    return JSON.parse(
-      JSON.stringify({
-        success: false,
-        tasks: null,
-        error: "Failed to load tasks",
-      }),
-    );
+    console.error("Error deleting tasks:", error);
+    return { success: false, deletedCount: 0, error: "Failed to delete tasks" };
   }
 }

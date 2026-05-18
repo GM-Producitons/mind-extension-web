@@ -1,76 +1,59 @@
-export type TaskCategory = "study" | "work" | "gym" | "personal" | "meshwar";
-
-export type TimePreference = "morning" | "afternoon" | "evening";
-
-export type RecurrenceType = "daily" | "weekly" | "advanced";
-
-export interface RecurrenceRule {
-  type: RecurrenceType;
-  interval?: number;
-  weekdays?: number[];
-  rrule?: string;
-  until?: Date;
-}
-
-export interface TaskItem {
-  id: string;
-  title: string;
-  peopleInvolved: string[];
-  deadline?: Date;
-  estimatedDurationMinutes: number;
-  drainFactor: number;
+export interface Mission {
+  _id: string;
+  name: string;
   priority: number;
-  category: TaskCategory;
-  isFixed: boolean;
-  preferredTime?: TimePreference;
-  splittable: boolean;
-  recurrence?: RecurrenceRule;
-  fixedStartTime?: string;
-  fixedEndTime?: string;
-  completed?: boolean;
+  deadline: Date;
+  taskIds: string[];
+  createdAt: Date;
 }
 
-export interface LongEvent {
-  id: string;
+/** A schedule task is stored in the `todos` collection with an added missionId. */
+export interface ScheduleTask {
+  _id: string;
+  missionId: string;
   title: string;
-  start: Date;
-  days: number;
-  color?: string;
+  date: Date;
+  fromTime: string;
+  utcFromTime: string;
+  untilTime: string;
+  completed: boolean;
+  createdAt: Date;
 }
 
-export type ScheduleBlockSource = "fixed" | "generated" | "recurring" | "event";
+// ─── DayTimeline types ────────────────────────────────────────────────────────
+
+export type TaskCategory = "study" | "work" | "gym" | "personal" | "meshwar";
 
 export interface ScheduledBlock {
   id: string;
-  sourceId?: string;
   title: string;
   category: TaskCategory | "event";
-  source: ScheduleBlockSource;
+  source: string;
   startMinute: number;
   endMinute: number;
   isFixed: boolean;
-}
-
-export interface DangerSlot {
-  startMinute: number;
-  endMinute: number;
-  durationMinutes: number;
-}
-
-export interface ScheduleConflict {
-  id: string;
-  leftId: string;
-  rightId?: string;
-  message: string;
-  severity: "warning" | "error";
+  sourceId?: string;
 }
 
 export interface GeneratedDaySchedule {
-  id?: string;
-  userId: string;
   dateKey: string;
   blocks: ScheduledBlock[];
-  dangerSlots: DangerSlot[];
-  conflicts: ScheduleConflict[];
-  generatedAt: Date;
+  dangerSlots: {
+    startMinute: number;
+    endMinute: number;
+    durationMinutes: number;
+  }[];
+  conflicts: { id: string; message: string; severity?: "warning" | "error" }[];
+}
+
+export interface ScheduleTask {
+  _id: string;
+  missionId: string;
+  title: string;
+  date: Date;
+  fromTime: string;
+  utcFromTime: string;
+  untilTime: string;
+  completed: boolean;
+  createdAt: Date;
 }

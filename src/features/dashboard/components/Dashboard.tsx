@@ -39,6 +39,13 @@ const subAppsData: SubApp[] = [
     href: "/vision",
     icon: <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
   },
+  {
+    id: "test",
+    title: "Test App",
+    description: "This is a test app for development purposes",
+    href: "/test",
+    icon: <Wrench className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
+  }
 ];
 
 function renderAppCard(app: SubApp): ReactNode {

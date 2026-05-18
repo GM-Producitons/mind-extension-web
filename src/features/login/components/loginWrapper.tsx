@@ -47,7 +47,11 @@ export default function Login() {
         <CardContent>
           <div className="flex flex-col items-center space-y-2">
             <p>Email/Name</p>
-            <Input onChange={(e) => setEmail(e.target.value)} value={email} />
+            <Input
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
+              autoComplete="email"
+            />
             <p>Pass</p>
             <Input
               type="password"
