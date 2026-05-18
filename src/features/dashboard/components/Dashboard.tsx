@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Brain, Zap, Eye, Plus } from "lucide-react";
+import { Brain, Zap, Eye, Plus, Wrench } from "lucide-react";
 import { ReactNode, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,7 @@ const subAppsData: SubApp[] = [
     description: "This is a test app for development purposes",
     href: "/test",
     icon: <Wrench className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
-  }
+  },
 ];
 
 function renderAppCard(app: SubApp): ReactNode {

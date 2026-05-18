@@ -2,7 +2,12 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Field, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field";
+import {
+  Field,
+  FieldLabel,
+  FieldDescription,
+  FieldError,
+} from "@/components/ui/field";
 import type { FormFieldSchema } from "../types/form-types";
 import { getFieldComponent } from "../registry/field-registry";
 import { getNestedValue } from "../utils/nested-path";
@@ -33,18 +38,13 @@ function FormFieldWrapperInner<T extends Record<string, unknown>>({
     return (
       <Field className={field.ui?.className}>
         {field.label && (
-          <FieldLabel
-            htmlFor={field.id}
-            required={field.required}
-            icon={
-              field.icons?.labelIcon
-                ? React.createElement(field.icons.labelIcon, {
-                    className: "h-4 w-4",
-                  })
-                : undefined
-            }
-          >
+          <FieldLabel htmlFor={field.id}>
+            {field.icons?.labelIcon &&
+              React.createElement(field.icons.labelIcon, {
+                className: "h-4 w-4",
+              })}
             {field.label}
+            {field.required && <span className="text-destructive">*</span>}
           </FieldLabel>
         )}
         {field.render({ value, onChange, formState, fieldDef: field })}
@@ -72,18 +72,13 @@ function FormFieldWrapperInner<T extends Record<string, unknown>>({
     <Field className={field.ui?.className}>
       {/* Outside label */}
       {!isInside && field.label && (
-        <FieldLabel
-          htmlFor={field.id}
-          required={field.required}
-          icon={
-            field.icons?.labelIcon
-              ? React.createElement(field.icons.labelIcon, {
-                  className: "h-4 w-4",
-                })
-              : undefined
-          }
-        >
+        <FieldLabel htmlFor={field.id}>
+          {field.icons?.labelIcon &&
+            React.createElement(field.icons.labelIcon, {
+              className: "h-4 w-4",
+            })}
           {field.label}
+          {field.required && <span className="text-destructive">*</span>}
         </FieldLabel>
       )}
 

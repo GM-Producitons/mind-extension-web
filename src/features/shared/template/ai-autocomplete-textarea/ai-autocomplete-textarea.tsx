@@ -1,12 +1,15 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Loader2, Wand2, CheckCircle2, Circle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { useAiAutocomplete, type UseAiAutocompleteOptions } from './use-ai-autocomplete';
+import * as React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sparkles, Loader2, Wand2, CheckCircle2, Circle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  useAiAutocomplete,
+  type UseAiAutocompleteOptions,
+} from "./use-ai-autocomplete";
 
 // ── Criteria badge ────────────────────────────────────────────────
 
@@ -20,7 +23,7 @@ export interface CriteriaItem {
 
 export interface AiAutocompleteTextareaProps extends Omit<
   UseAiAutocompleteOptions,
-  'value' | 'onChange'
+  "value" | "onChange"
 > {
   /** Controlled value */
   value: string;
@@ -97,13 +100,17 @@ export function AiAutocompleteTextarea({
   });
 
   return (
-    <div className={cn('rounded-xl border bg-card p-6', className)}>
+    <div className={cn("rounded-xl border bg-card p-6", className)}>
       {/* Header */}
       {(title || icon || showGenBtn) && (
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {icon}
-            {title && <h3 className="text-base font-semibold text-[#003366]">{title}</h3>}
+            {title && (
+              <h3 className="text-base font-semibold text-[#003366]">
+                {title}
+              </h3>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {isLoadingAi && !isGenerating && (
@@ -116,10 +123,10 @@ export function AiAutocompleteTextarea({
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Sparkles className="h-3 w-3" />
                 <span>
-                  Press{' '}
+                  Press{" "}
                   <kbd className="rounded border bg-muted px-1 py-0.5 font-mono text-[10px]">
                     Tab
-                  </kbd>{' '}
+                  </kbd>{" "}
                   to accept
                 </span>
               </div>
@@ -161,15 +168,19 @@ export function AiAutocompleteTextarea({
                 transition={{ duration: 0.2 }}
               >
                 <Badge
-                  variant={item.met ? 'default' : 'outline'}
+                  variant={item.met ? "default" : "outline"}
                   className={cn(
-                    'gap-1 text-xs transition-colors',
+                    "gap-1 text-xs transition-colors",
                     item.met
-                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                      : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300',
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                      : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300",
                   )}
                 >
-                  {item.met ? <CheckCircle2 className="h-3 w-3" /> : <Circle className="h-3 w-3" />}
+                  {item.met ? (
+                    <CheckCircle2 className="h-3 w-3" />
+                  ) : (
+                    <Circle className="h-3 w-3" />
+                  )}
                   {item.label}
                 </Badge>
               </motion.div>
@@ -188,10 +199,10 @@ export function AiAutocompleteTextarea({
           placeholder={placeholder}
           disabled={isGenerating}
           className={cn(
-            'w-full resize-none bg-transparent text-sm leading-relaxed outline-none',
-            'placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-70',
+            "w-full resize-none bg-transparent text-sm leading-relaxed outline-none",
+            "placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-70",
           )}
-          style={{ minHeight, caretColor: 'auto' }}
+          style={{ minHeight, caretColor: "auto" }}
         />
 
         {/* Ghost suggestion — Copilot-style overlay */}
@@ -209,7 +220,9 @@ export function AiAutocompleteTextarea({
       </div>
 
       {/* Footer */}
-      {footerText && <p className="mt-2 text-xs text-muted-foreground">{footerText}</p>}
+      {footerText && (
+        <p className="mt-2 text-xs text-muted-foreground">{footerText}</p>
+      )}
     </div>
   );
 }
