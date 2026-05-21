@@ -5,6 +5,7 @@ export interface Mission {
   deadline: Date;
   taskIds: string[];
   createdAt: Date;
+  completionRate: number;
 }
 
 /** A schedule task is stored in the `todos` collection with an added missionId. */
