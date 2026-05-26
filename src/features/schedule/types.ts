@@ -8,22 +8,24 @@ export interface Mission {
   completionRate: number;
 }
 
+// ─── DayTimeline types ────────────────────────────────────────────────────────
+
+export type TaskCategory = "study" | "work" | "gym" | "personal" | "meshwar";
+
 /** A schedule task is stored in the `todos` collection with an added missionId. */
 export interface ScheduleTask {
   _id: string;
   missionId: string;
   title: string;
+  type?: TaskCategory;
   date: Date;
   fromTime: string;
   utcFromTime: string;
   untilTime: string;
   completed: boolean;
+  completionFactor?: number;
   createdAt: Date;
 }
-
-// ─── DayTimeline types ────────────────────────────────────────────────────────
-
-export type TaskCategory = "study" | "work" | "gym" | "personal" | "meshwar";
 
 export interface ScheduledBlock {
   id: string;
@@ -45,16 +47,4 @@ export interface GeneratedDaySchedule {
     durationMinutes: number;
   }[];
   conflicts: { id: string; message: string; severity?: "warning" | "error" }[];
-}
-
-export interface ScheduleTask {
-  _id: string;
-  missionId: string;
-  title: string;
-  date: Date;
-  fromTime: string;
-  utcFromTime: string;
-  untilTime: string;
-  completed: boolean;
-  createdAt: Date;
 }

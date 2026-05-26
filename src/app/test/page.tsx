@@ -395,45 +395,53 @@ export default function Page() {
           </div>
         </div>
 
-        <Card className="p-4 flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-muted-foreground">
-              JSON output (editable)
-            </span>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setScheduleJson("");
-                  setSchedule(null);
-                  setJsonError(null);
-                }}
-                disabled={!scheduleJson}
-              >
-                Clear
-              </Button>
-              <Button size="sm" onClick={handleApply} disabled={!scheduleJson}>
-                Apply to schedule
-              </Button>
+        <div className="flex w-full gap-4 justify-between">
+          <Card className="p-4 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-muted-foreground">
+                JSON output (editable)
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setScheduleJson("");
+                    setSchedule(null);
+                    setJsonError(null);
+                  }}
+                  disabled={!scheduleJson}
+                >
+                  Clear
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleApply}
+                  disabled={!scheduleJson}
+                >
+                  Apply to schedule
+                </Button>
+              </div>
             </div>
-          </div>
 
-          <Textarea
-            className="font-mono text-xs min-h-48 resize-y"
-            placeholder="AI schedule JSON will appear here after generation…"
-            value={scheduleJson}
-            onChange={(e) => setScheduleJson(e.target.value)}
-          />
+            <Textarea
+              className="font-mono text-xs min-h-48 resize-y"
+              placeholder="AI schedule JSON will appear here after generation…"
+              value={scheduleJson}
+              onChange={(e) => setScheduleJson(e.target.value)}
+            />
 
-          {jsonError && <p className="text-sm text-destructive">{jsonError}</p>}
-        </Card>
-
-        {schedule && (
-          <Card className="p-4">
-            <DayTimeline schedule={schedule} isGenerating={generating} />
+            {jsonError && (
+              <p className="text-sm text-destructive">{jsonError}</p>
+            )}
           </Card>
-        )}
+
+          {schedule && (
+            <Card className="p-4 flex-1">
+              <DayTimeline schedule={schedule} isGenerating={generating} />
+            </Card>
+          )}
+        </div>
       </section>
     </div>
   );

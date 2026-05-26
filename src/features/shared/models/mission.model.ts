@@ -8,6 +8,7 @@ export interface MissionDocument {
   priority: number;
   deadline: Date;
   taskIds: string[];
+  completionRate: number;
   createdAt: Date;
 }
 
@@ -17,6 +18,7 @@ const MissionSchema = new Schema<MissionDocument>(
     priority: { type: Number, required: true, min: 1, max: 5 },
     deadline: { type: Date, required: true },
     taskIds: [{ type: String, default: [] }],
+    completionRate: { type: Number, default: 0, min: 0, max: 100 },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );

@@ -21,7 +21,10 @@ function minuteToHeight(startMinute: number, endMinute: number) {
 }
 
 function formatHour(hour: number) {
-  return `${hour.toString().padStart(2, "0")}:00`;
+  if (hour >= 13) {
+    return `${(hour - 12).toString()} PM`;
+  }
+  return `${hour.toString()} AM`;
 }
 
 function categoryClassName(block: ScheduledBlock) {
