@@ -184,7 +184,7 @@ export default function Page() {
 
   useEffect(() => {
     getMissionsAction().then((res) => {
-      if (res.success) setMissions(res.missions);
+      if (res.success) setMissions(res.data);
     });
     getRecurringTasksAction().then((res) => {
       if (res.success && res.data) setRecurringTasks(res.data);
@@ -199,8 +199,8 @@ export default function Page() {
       priority: Number(values.priority),
       deadline: new Date(values.deadline as string),
     });
-    if (result.success && result.mission) {
-      setMissions((prev) => [...prev, result.mission!]);
+    if (result.success && result.data) {
+      setMissions((prev) => [...prev, result.data!]);
       reset();
       clearErrors();
     }
@@ -243,8 +243,9 @@ export default function Page() {
     setGenerating(true);
     setJsonError(null);
     const result = await generateScheduleAction(selectedDate);
-    if (result.success) {
-      setScheduleJson(result.json);
+    if (result.success && result.schedule) {
+      setSchedule(result.schedule);
+      setScheduleJson(JSON.stringify(result.schedule, null, 2));
     } else {
       setJsonError(result.error ?? "Unknown error");
     }

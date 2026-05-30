@@ -12,6 +12,16 @@ export interface Mission {
 
 export type TaskCategory = "study" | "work" | "gym" | "personal" | "meshwar";
 
+export type BlockCategory = TaskCategory | "event" | "prayer";
+
+export interface AgentSuggestion {
+  title: string;
+  category: BlockCategory;
+  durationMinutes: number;
+  priority: "high" | "medium" | "low";
+  note?: string;
+}
+
 /** A schedule task is stored in the `todos` collection with an added missionId. */
 export interface ScheduleTask {
   _id: string;
@@ -30,7 +40,7 @@ export interface ScheduleTask {
 export interface ScheduledBlock {
   id: string;
   title: string;
-  category: TaskCategory | "event";
+  category: BlockCategory;
   source: string;
   startMinute: number;
   endMinute: number;

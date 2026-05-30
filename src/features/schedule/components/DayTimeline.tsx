@@ -39,6 +39,8 @@ function categoryClassName(block: ScheduledBlock) {
       return "bg-fuchsia-500/25 border-fuchsia-500/60";
     case "event":
       return "bg-sky-500/25 border-sky-500/60";
+    case "prayer":
+      return "bg-violet-500/20 border-violet-400/70";
     default:
       return "bg-zinc-500/25 border-zinc-500/60";
   }
