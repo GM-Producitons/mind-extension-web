@@ -903,3 +903,7 @@
 //     </div>
 //   );
 // }
+
+export default function TableBuilder() {
+  return <div>Table builder page</div>;
+}
