@@ -1,7 +1,7 @@
 import { streamText, tool, convertToModelMessages, type UIMessage } from "ai";
 import { groq } from "@ai-sdk/groq";
 import { z } from "zod";
-import { generateScheduleAction } from "@/features/schedule/apis/generate.actions";
+// import { generateScheduleAction } from "@/features/schedule/apis/generate.actions";
 
 export const maxDuration = 60;
 

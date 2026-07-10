@@ -1,7 +1,7 @@
 ﻿import { ObjectId } from "mongodb";
 import { getDB, connectMongoose } from "@/lib/db";
 import { MissionModel } from "@/features/shared/models/mission.model";
-import type { Mission, ScheduleTask } from "../src/features/schedule/types";
+// import type { Mission, ScheduleTask } from "../src/features/schedule/types";
 
 // --- Missions (Mongoose) ---
 
@@ -9,13 +9,13 @@ export async function createMissionRecord(data: {
   name: string;
   priority: number;
   deadline: Date;
-}): Promise<Mission> {
+}): Promise<any> {
   await connectMongoose();
   const doc = await MissionModel.create({ ...data, taskIds: [] });
   return JSON.parse(JSON.stringify(doc));
 }
 
-export async function getMissionRecords(): Promise<Mission[]> {
+export async function getMissionRecords(): Promise<any[]> {
   await connectMongoose();
   const docs = await MissionModel.find().sort({ deadline: 1 }).lean();
   return JSON.parse(JSON.stringify(docs));
@@ -40,7 +40,7 @@ export async function createScheduleTaskRecord(data: {
   fromTime: string;
   utcFromTime: string;
   untilTime: string;
-}): Promise<ScheduleTask> {
+}): Promise<any> {
   const db = await getDB();
   const now = new Date();
   const result = await db.collection("todos").insertOne({
@@ -69,7 +69,7 @@ export async function deleteTasksByMissionIdRecord(
 export async function updateMissionRecord(
   id: string,
   data: { name: string; priority: number; deadline: Date },
-): Promise<Mission> {
+): Promise<any> {
   await connectMongoose();
   const doc = await MissionModel.findByIdAndUpdate(id, data, {
     new: true,
@@ -85,7 +85,7 @@ export async function deleteMissionRecord(id: string): Promise<void> {
 
 export async function getTasksByMissionIdRecord(
   missionId: string,
-): Promise<ScheduleTask[]> {
+): Promise<any[]> {
   const db = await getDB();
   const docs = await db
     .collection("todos")

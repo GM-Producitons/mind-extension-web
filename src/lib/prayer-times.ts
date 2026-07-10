@@ -1,5 +1,5 @@
 import { PrayerTimes, Coordinates, CalculationMethod } from "adhan";
-import type { ScheduledBlock } from "@/features/schedule/types";
+// import type { ScheduledBlock } from "@/features/schedule/types";
 
 // Alexandria, Egypt
 const COORDS = new Coordinates(31.250168, 29.972676);
@@ -19,7 +19,7 @@ function utcDateToLocalMinutes(date: Date, utcOffsetMinutes: number): number {
 export function getPrayerBlocks(
   dateKey: string,
   utcOffsetMinutes: number,
-): ScheduledBlock[] {
+): any[] {
   const date = new Date(`${dateKey}T12:00:00Z`);
   const pt = new PrayerTimes(COORDS, date, PARAMS);
 

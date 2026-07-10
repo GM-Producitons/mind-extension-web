@@ -1,5 +1,5 @@
-import SchedulePage from "@/features/schedule/components/SchedulePage";
+// import SchedulePage from "@/features/schedule/components/SchedulePage";
 
 export default function Page() {
-  return <SchedulePage />;
+  return <div>under development</div>;
 }
