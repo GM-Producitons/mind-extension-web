@@ -1,5 +1,6 @@
 import { connectMongoose } from "@/lib/db";
-import { RecurringTaskModel } from "../models/recurring-task.model";
+import { RecurringTaskModel } from "@/features/shared/models/recurring-task.model";
+
 import type { CreateRecurringTaskInput, WeekDay } from "../types";
 
 export async function createRecurringTaskRecord(
