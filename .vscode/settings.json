@@ -131,7 +131,7 @@
     "markdown": false,
     "scminput": false,
     "html": false,
-    "typescriptreact": true
+    "typescriptreact": false
   },
   "chat.instructionsFilesLocations": {
     ".github/instructions": true,

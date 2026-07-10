@@ -29,12 +29,12 @@ export async function loginUser(email: string, password: string) {
     const user = await db.collection("users").findOne({ email: email });
 
     if (!user) {
-      return { success: false, error: "انت مين يخول" };
+      return { success: false, error: "عيب" };
     }
 
     const isPasswordValid = await compareHash(password, user.password);
     if (!isPasswordValid) {
-      return { success: false, error: "غلط, حطه صح" };
+      return { success: false, error: "عيب" };
     }
 
     const token = await generateToken({
