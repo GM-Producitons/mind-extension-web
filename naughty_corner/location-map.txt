@@ -1,1 +1,4 @@
-schedule folder --> /features
+schedule folder --> features/
+
+_page.tsx --> app/test/
+
