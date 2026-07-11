@@ -43,7 +43,7 @@ export default function Login() {
   return (
     <div className="w-full h-full flex justify-center items-center">
       <Card className="w-fit flex justify-center items-center">
-        <CardTitle>Who the fuck are you?</CardTitle>
+        <CardTitle>Who are you?</CardTitle>
         <CardContent>
           <div className="flex flex-col items-center space-y-2">
             <p>Email/Name</p>
