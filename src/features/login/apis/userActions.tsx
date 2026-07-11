@@ -29,16 +29,19 @@ export async function loginUser(email: string, password: string) {
     const user = await db.collection("users").findOne({ email: email });
 
     if (!user) {
+      console.log("didn't find the user");
       return { success: false, error: "عيب" };
     }
 
     const isPasswordValid = await compareHash(password, user.password);
     if (!isPasswordValid) {
+      console.log("password didn't match tha hash");
       return { success: false, error: "عيب" };
     }
 
     const token = await generateToken({
       userId: user._id.toString(),
+      username: user.username,
       email: user.email,
     });
 
@@ -66,5 +69,6 @@ export async function loginUser(email: string, password: string) {
 export async function logoutUser() {
   const cookieStore = await cookies();
   cookieStore.delete("auth-token");
+  console.log("user logged out!");
   return { success: true };
 }

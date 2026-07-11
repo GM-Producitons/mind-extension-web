@@ -16,13 +16,16 @@ import {
   Moon,
   Sun,
   Bell,
+  LogOut,
 } from "lucide-react";
 import { SettingsModal } from "@/features/settings/SettingsModal";
+import { logoutUser } from "@/features/login/apis/userActions";
 
 interface App {
   name: string;
   icon: React.ReactNode;
   href: string;
+  onClickFunction?: () => {};
 }
 
 export default function SettingsButton() {
@@ -73,6 +76,16 @@ export default function SettingsButton() {
           <Moon className="h-5 w-5" />
         ),
       href: "#",
+    },
+    {
+      name: "logout",
+      icon: <LogOut className="h-5 w-5" />,
+      href: "/login",
+      onClickFunction: async () => {
+        await logoutUser();
+        router.replace("/login");
+        router.refresh();
+      },
     },
   ];
 
@@ -196,6 +209,7 @@ export default function SettingsButton() {
                           setOpen(false);
                           router.push(app.href);
                           console.log("manga");
+                          app.onClickFunction?.();
                         }
                       }}
                       className="flex items-center justify-center text-primary hover:text-accent transition-colors"
@@ -203,6 +217,7 @@ export default function SettingsButton() {
                         setOpen(false);
                         router.push(app.href);
                         console.log("manga");
+                        app.onClickFunction?.();
                       }}
                     >
                       {app.icon}

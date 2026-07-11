@@ -1,28 +1,34 @@
-import { SignJWT, jwtVerify } from 'jose';
+import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 
-export async function createHash(pass: string){
-    return bcrypt.hash(pass,14)
+export async function createHash(pass: string) {
+  return bcrypt.hash(pass, 14);
 }
 
-export async function compareHash(pass: string, hash: string){
-    return bcrypt.compare(pass,hash)
+export async function compareHash(pass: string, hash: string) {
+  return bcrypt.compare(pass, hash);
 }
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'your-secret-key-change-in-env-at-least-32-chars-long'
+  process.env.JWT_SECRET ||
+    "your-secret-key-change-in-env-at-least-32-chars-long",
 );
 
 export interface TokenPayload {
   userId: string;
+  username?: string;
   email: string;
 }
 
 export async function generateToken(payload: TokenPayload): Promise<string> {
-  return new SignJWT({ userId: payload.userId, email: payload.email })
-    .setProtectedHeader({ alg: 'HS256' })
+  return new SignJWT({
+    userId: payload.userId,
+    username: payload.username,
+    email: payload.email,
+  })
+    .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime("7d")
     .sign(JWT_SECRET);
 }
 
@@ -30,11 +36,16 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
   try {
     const verified = await jwtVerify(token, JWT_SECRET);
     const payload = verified.payload;
-    
-    if (typeof payload.userId === 'string' && typeof payload.email === 'string') {
+
+    if (
+      typeof payload.userId === "string" &&
+      typeof payload.username === "string" &&
+      typeof payload.email === "string"
+    ) {
       return {
         userId: payload.userId,
-        email: payload.email
+        username: payload.username,
+        email: payload.email,
       };
     }
     return null;

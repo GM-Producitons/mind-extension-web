@@ -5,6 +5,8 @@ import { verifyToken } from "./lib/auth-utils";
 // Routes that don't need auth
 const PUBLIC_ROUTES = ["/login"];
 const forbiddenRoutes = ["/"];
+const maramRoute = "/chat";
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("auth-token")?.value;
@@ -16,7 +18,6 @@ export async function middleware(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(route + "/"),
   );
 
-  // Already logged in? Redirect away from login page
   if (isPublic && token) {
     const payload = await verifyToken(token);
     if (payload) {
@@ -34,6 +35,9 @@ export async function middleware(request: NextRequest) {
     }
 
     const payload = await verifyToken(token);
+    if (payload?.username === "Maram" && pathname !== maramRoute) {
+      return NextResponse.redirect(new URL(maramRoute, request.url));
+    }
     if (!payload) {
       // Bad/expired token — clear it and redirect to login
       const response = NextResponse.redirect(new URL("/login", request.url));

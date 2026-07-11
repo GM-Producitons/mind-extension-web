@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ably/chat": "^1.4.0",
     "@ai-sdk/deepseek": "^2.0.31",
     "@ai-sdk/google": "^3.0.66",
     "@ai-sdk/groq": "^3.0.37",
@@ -20,6 +21,7 @@
     "@tiptap/pm": "^3.24.0",
     "@tiptap/react": "^3.24.0",
     "@tiptap/starter-kit": "^3.24.0",
+    "ably": "^2.24.0",
     "adhan": "^4.4.3",
     "ai": "^6.0.172",
     "axios": "^1.13.5",
