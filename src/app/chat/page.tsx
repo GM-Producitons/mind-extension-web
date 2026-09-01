@@ -5,6 +5,7 @@ import { ChatClient, LogLevel } from "@ably/chat";
 import { ChatClientProvider } from "@ably/chat/react";
 import { AblyProvider } from "ably/react";
 import Chat from "@/features/chat/Chat";
+import { logChatAccess } from "./actions";
 
 export default function ChatPage() {
   const [clients, setClients] = useState<{
@@ -59,17 +60,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (!userFlags) return;
 
-    if (userFlags.isMe) {
-      console.log(
-        `[Chat Access] User with isMe=true opened chat: ${userFlags.username}`,
-      );
-    }
-
-    if (userFlags.isMaram) {
-      console.log(
-        `[Chat Access] User with isMaram=true opened chat: ${userFlags.username}`,
-      );
-    }
+    logChatAccess(userFlags.username, userFlags.isMe, userFlags.isMaram);
   }, [userFlags]);
 
   if (!clients) return null;
