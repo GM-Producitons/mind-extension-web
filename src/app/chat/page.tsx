@@ -11,6 +11,11 @@ export default function ChatPage() {
     realtimeClient: Ably.Realtime;
     chatClient: ChatClient;
   } | null>(null);
+  const [userFlags, setUserFlags] = useState<{
+    username: string;
+    isMe: boolean;
+    isMaram: boolean;
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -22,6 +27,14 @@ export default function ChatPage() {
         return;
       }
       const data = await response.json();
+
+      if (!cancelled) {
+        setUserFlags({
+          username: data.username,
+          isMe: data.isMe,
+          isMaram: data.isMaram,
+        });
+      }
 
       const realtimeClient = new Ably.Realtime({
         key: process.env.NEXT_PUBLIC_ABLY_API_KEY,
@@ -42,6 +55,22 @@ export default function ChatPage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!userFlags) return;
+
+    if (userFlags.isMe) {
+      console.log(
+        `[Chat Access] User with isMe=true opened chat: ${userFlags.username}`,
+      );
+    }
+
+    if (userFlags.isMaram) {
+      console.log(
+        `[Chat Access] User with isMaram=true opened chat: ${userFlags.username}`,
+      );
+    }
+  }, [userFlags]);
 
   if (!clients) return null;
 

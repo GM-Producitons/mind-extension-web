@@ -12,7 +12,7 @@ const BANNED_USERS = [
   "Username1",
   "Username2",
   "Boda",
-  // Add more usernames here
+  // Add mkore usernames here
 ];
 
 function logout(request: NextRequest) {
