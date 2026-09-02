@@ -60,7 +60,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (!userFlags) return;
 
-    logChatAccess(userFlags.username, userFlags.isMe, userFlags.isMaram);
+    void logChatAccess();
   }, [userFlags]);
 
   if (!clients) return null;

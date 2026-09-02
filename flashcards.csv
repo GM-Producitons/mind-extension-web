@@ -1,0 +1,4 @@
+"How does the `/test` log dashboard separate records?","It queries the `logs` collection for records where `isMe` or `isMaram` is true, then filters the results into dedicated `isMaram` and `isMe` columns.","logs-dashboard nextjs mongodb"
+"What does each log dashboard column display?","Each column displays its tracked flag name, total log count, latest log date and time, and the matching log cards.","logs-dashboard ui"
+"Why is the log dashboard a server component?","It reads the MongoDB `logs` collection directly on the server, avoiding client-side database access.","logs-dashboard nextjs security"
+"What can be inspected on a log card?","A log card shows the username, event type, timestamp, email, path, and an expandable JSON view of the complete stored event data.","logs-dashboard ui mongodb"
