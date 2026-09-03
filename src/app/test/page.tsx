@@ -1,6 +1,8 @@
 import type { Document } from "mongodb";
 import { getDB } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 type LogRecord = Document & {
   timestamp?: Date | string;
   username?: string;
