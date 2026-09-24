@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { Brain, Zap, Eye } from "lucide-react";
+import { Brain, Zap, Eye, Layers } from "lucide-react";
 import { ReactNode, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "next-themes";
@@ -34,6 +34,13 @@ const subAppsData: SubApp[] = [
     description: "Your vision and long-term goals",
     href: "/vision",
     icon: <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
+  },
+  {
+    id: "flashcards",
+    title: "Flashcards",
+    description: "Practice clues grouped into clusters",
+    href: "/flashcards",
+    icon: <Layers className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
   },
 ];
 

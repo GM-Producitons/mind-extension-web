@@ -13,6 +13,7 @@ import {
   Bus,
   CheckSquare,
   Eye,
+  Layers,
   Moon,
   Sun,
   Bell,
@@ -66,6 +67,11 @@ export default function SettingsButton() {
       name: "Vision",
       icon: <Eye className="h-5 w-5" />,
       href: "/vision",
+    },
+    {
+      name: "Flashcards",
+      icon: <Layers className="h-5 w-5" />,
+      href: "/flashcards",
     },
     {
       name: mounted && theme === "dark" ? "Light Mode" : "Dark Mode",

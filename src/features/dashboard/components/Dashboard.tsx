@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Brain, Zap, Eye, Plus, Wrench, MessageCircle } from "lucide-react";
+import { Brain, Zap, Eye, Plus, Wrench, MessageCircle, Layers } from "lucide-react";
 import { ReactNode, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,13 @@ const subAppsData: SubApp[] = [
     description: "Chat with other users ;)",
     href: "/chat",
     icon: <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
+  },
+  {
+    id: "flashcards",
+    title: "Flashcards",
+    description: "Practice clues grouped into clusters",
+    href: "/flashcards",
+    icon: <Layers className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
   },
 ];
 

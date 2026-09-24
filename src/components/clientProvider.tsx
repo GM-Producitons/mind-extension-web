@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeProvider } from "next-themes";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function ClientProviders({
   children,
@@ -10,6 +11,7 @@ export default function ClientProviders({
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       {children}
+      <Toaster />
     </ThemeProvider>
   );
 }

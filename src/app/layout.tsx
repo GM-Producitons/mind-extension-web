@@ -1,8 +1,18 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import ClientProviders from "@/components/clientProvider";
 import SettingsButton from "@/components/SettingsButton";
+
+const viewportBootScript = `(function () {
+  var query = window.matchMedia("(max-width: 767px)");
+  var apply = function () {
+    document.documentElement.dataset.viewportMobile = query.matches ? "true" : "false";
+  };
+  apply();
+  query.addEventListener("change", apply);
+})();`;
 
 // import ServiceWorkerRegister from "@/features/notifications/ServiceWorkerRegister";
 const geistSans = Geist({
@@ -36,6 +46,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased w-full h-full`}
       >
+        <Script id="viewport-mobile" strategy="beforeInteractive">
+          {viewportBootScript}
+        </Script>
         {/* <ServiceWorkerRegister /> */}
         <ClientProviders>
           {children}
