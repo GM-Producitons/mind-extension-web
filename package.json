@@ -23,6 +23,7 @@
     "@tiptap/pm": "^3.24.0",
     "@tiptap/react": "^3.24.0",
     "@tiptap/starter-kit": "^3.24.0",
+    "@vercel/blob": "^2.8.0",
     "ably": "^2.24.0",
     "adhan": "^4.4.3",
     "ai": "^6.0.172",

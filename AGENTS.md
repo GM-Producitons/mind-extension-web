@@ -73,6 +73,13 @@ When adding:
 - Charts use `ChartContainer` from `src/components/ui/chart.tsx` and recharts. Series colors come from the `--chart-*` tokens through `ChartConfig`.
 - A refresh that changes nothing shows a spinner on the refresh icon and a toast. Do not replace the page with a skeleton.
 
+## MyInsta
+
+- Feed-only at `/myinsta`. Likes persist (`liked` boolean). Comments, share, and bookmark are visual only. No collections in v1.
+- Images upload to Vercel Blob via OIDC (`BLOB_STORE_ID` + `VERCEL_OIDC_TOKEN`, `handleUploadPresigned` at `/api/myinsta/upload`). Mongo stores URLs + pathnames only. Connect the store to Development or `vercel env pull` will not get Blob vars.
+- Private Blob URLs need signed GET links on read (`issueSignedToken` + `presignUrl`). Feed images use `next/image` with `unoptimized`.
+- Posts are filtered by `userId` from the auth cookie. Delete a post also deletes its Blob pathnames.
+
 ## Client state
 
 - **Zustand** for client state shared across components. Not for a single widget's local open/closed or input state.

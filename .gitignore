@@ -42,3 +42,5 @@ next-env.d.ts
 
 #firebase
 service-account.json
+.vercel
+.env*.local

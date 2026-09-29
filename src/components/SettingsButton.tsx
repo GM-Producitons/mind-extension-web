@@ -14,6 +14,7 @@ import {
   CheckSquare,
   Eye,
   Layers,
+  Instagram,
   Moon,
   Sun,
   Bell,
@@ -72,6 +73,11 @@ export default function SettingsButton() {
       name: "Flashcards",
       icon: <Layers className="h-5 w-5" />,
       href: "/flashcards",
+    },
+    {
+      name: "MyInsta",
+      icon: <Instagram className="h-5 w-5" />,
+      href: "/myinsta",
     },
     {
       name: mounted && theme === "dark" ? "Light Mode" : "Dark Mode",
