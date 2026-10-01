@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,32 +17,52 @@ interface PostCarouselProps {
   alt: string;
 }
 
-function CarouselSlideImage({ image, alt }: { image: PostImage; alt: string }) {
-  const hasDims =
+type ImageDims = { width: number; height: number };
+
+function storedDims(image: PostImage): ImageDims | null {
+  if (
     typeof image.width === "number" &&
     image.width > 0 &&
     typeof image.height === "number" &&
-    image.height > 0;
-  const [dims, setDims] = useState(
-    hasDims ? { width: image.width!, height: image.height! } : null,
-  );
+    image.height > 0
+  ) {
+    return { width: image.width, height: image.height };
+  }
+  return null;
+}
 
-  const width = dims?.width ?? 1200;
-  const height = dims?.height ?? 800;
+function initialDimsMap(images: PostImage[]) {
+  const map: Record<string, ImageDims> = {};
+  for (const image of images) {
+    const dims = storedDims(image);
+    if (dims) map[image.pathname] = dims;
+  }
+  return map;
+}
 
+function CarouselSlideImage({
+  image,
+  alt,
+  onDims,
+}: {
+  image: PostImage;
+  alt: string;
+  onDims: (pathname: string, dims: ImageDims) => void;
+}) {
   return (
     <Image
       src={image.url}
       alt={alt}
-      width={width}
-      height={height}
+      fill
       unoptimized
-      className="block w-full h-auto"
+      className="object-contain object-center"
       sizes="470px"
       onLoad={(event) => {
-        if (hasDims) return;
         const img = event.currentTarget;
-        setDims({ width: img.naturalWidth, height: img.naturalHeight });
+        onDims(image.pathname, {
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+        });
       }}
     />
   );
@@ -51,7 +71,32 @@ function CarouselSlideImage({ image, alt }: { image: PostImage; alt: string }) {
 export function PostCarousel({ images, alt }: PostCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
+  const [dimsByPath, setDimsByPath] = useState<Record<string, ImageDims>>(() =>
+    initialDimsMap(images),
+  );
   const hasMany = images.length > 1;
+
+  const registerDims = (pathname: string, dims: ImageDims) => {
+    setDimsByPath((prev) => {
+      const existing = prev[pathname];
+      if (
+        existing &&
+        existing.width === dims.width &&
+        existing.height === dims.height
+      ) {
+        return prev;
+      }
+      return { ...prev, [pathname]: dims };
+    });
+  };
+
+  const currentImage = images[Math.min(index, images.length - 1)];
+  const currentDims = currentImage ? dimsByPath[currentImage.pathname] : null;
+
+  const aspectRatio = useMemo(() => {
+    if (!currentDims) return "4 / 5";
+    return `${currentDims.width} / ${currentDims.height}`;
+  }, [currentDims]);
 
   const onScroll = () => {
     const el = scrollerRef.current;
@@ -68,18 +113,25 @@ export function PostCarousel({ images, alt }: PostCarouselProps) {
   };
 
   return (
-    <div className="relative bg-muted">
+    <div
+      className="relative w-full bg-muted"
+      style={{ aspectRatio }}
+    >
       <div
         ref={scrollerRef}
         onScroll={onScroll}
-        className="flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex h-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {images.map((image) => (
           <div
             key={image.pathname}
-            className="min-w-full w-full shrink-0 snap-center"
+            className="relative h-full min-w-full w-full shrink-0 snap-center"
           >
-            <CarouselSlideImage image={image} alt={alt} />
+            <CarouselSlideImage
+              image={image}
+              alt={alt}
+              onDims={registerDims}
+            />
           </div>
         ))}
       </div>
@@ -91,7 +143,7 @@ export function PostCarousel({ images, alt }: PostCarouselProps) {
               type="button"
               variant="secondary"
               size="icon-sm"
-              className="absolute top-1/2 left-2 hidden -translate-y-1/2 md:inline-flex"
+              className="absolute top-1/2 left-2 z-10 hidden -translate-y-1/2 md:inline-flex"
               onClick={() => go(index - 1)}
               aria-label="Previous image"
             >
@@ -109,7 +161,7 @@ export function PostCarousel({ images, alt }: PostCarouselProps) {
               type="button"
               variant="secondary"
               size="icon-sm"
-              className="absolute top-1/2 right-2 hidden -translate-y-1/2 md:inline-flex"
+              className="absolute top-1/2 right-2 z-10 hidden -translate-y-1/2 md:inline-flex"
               onClick={() => go(index + 1)}
               aria-label="Next image"
             >
@@ -121,7 +173,7 @@ export function PostCarousel({ images, alt }: PostCarouselProps) {
       )}
 
       {hasMany && (
-        <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
+        <div className="pointer-events-none absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1">
           {images.map((image, i) => (
             <span
               key={image.pathname}
