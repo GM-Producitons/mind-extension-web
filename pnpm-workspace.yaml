@@ -1,0 +1,2 @@
+patchedDependencies:
+  blobatar@2.7.0: patches/blobatar@2.7.0.patch

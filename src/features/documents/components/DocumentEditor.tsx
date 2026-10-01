@@ -33,6 +33,7 @@ export function DocumentEditor({
     content,
     editorProps: {
       attributes: {
+        dir: "auto",
         class:
           "prose prose-invert max-w-none min-h-[60vh] outline-none focus:outline-none px-10 py-6 text-white/80 leading-relaxed",
       },

@@ -217,9 +217,13 @@ export function PasswordField({
     const on = () => aim();
     addEventListener("scroll", on, { passive: true, capture: true });
     addEventListener("resize", on, { passive: true });
+    window.visualViewport?.addEventListener("resize", on, { passive: true });
+    window.visualViewport?.addEventListener("scroll", on, { passive: true });
     return () => {
       removeEventListener("scroll", on, { capture: true });
       removeEventListener("resize", on);
+      window.visualViewport?.removeEventListener("resize", on);
+      window.visualViewport?.removeEventListener("scroll", on);
     };
   }, [focused, shown, aim]);
 
@@ -266,7 +270,6 @@ export function PasswordField({
         {/* `relative` so the toggle can sit inside the field's own box. */}
         <div className="relative">
           <Input
-            ref={input}
             id={fieldId}
             /*
              * A real `type="password"`, swapped rather than masked by hand.
@@ -313,20 +316,20 @@ export function PasswordField({
             }}
             /* Moving the caret without changing the text is still aiming. */
             onKeyUp={track}
+            onInput={track}
             onClick={track}
             onSelect={track}
             onFocus={(e) => {
               setFocused(true);
               onFocus?.(e);
+              requestAnimationFrame(() => aim());
             }}
             onBlur={(e) => {
-              /* Leaving the field hands the eyes back to the pointer at once:
-                 they should be following you before you have finished moving to
-                 whatever you clicked. */
               setFocused(false);
               onBlur?.(e);
             }}
             {...props}
+            ref={input}
           />
 
           <button

@@ -63,6 +63,11 @@
     "zod": "^4.4.3",
     "zustand": "^5.0.12"
   },
+  "pnpm": {
+    "patchedDependencies": {
+      "blobatar@2.7.0": "patches/blobatar@2.7.0.patch"
+    }
+  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

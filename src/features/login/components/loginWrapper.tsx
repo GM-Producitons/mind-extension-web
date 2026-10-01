@@ -3,12 +3,14 @@ import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PasswordField } from "@/components/ui/password-field";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { loginUser } from "../apis/userActions";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/features/user_management/store/userStore";
 
 export default function Login() {
+  const isMobile = useIsMobile();
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -40,29 +42,53 @@ export default function Login() {
     setLoading(false);
   }
 
+  const passwordField = (
+    <PasswordField
+      className={
+        isMobile
+          ? "w-full max-w-none [&_.text-xs]:sr-only"
+          : "contents [&>div]:order-4 [&>svg]:order-1 [&_.text-xs]:sr-only"
+      }
+      value={password}
+      onValueChange={setPassword}
+      name={email.trim() || "guest"}
+      size={128}
+      label="Pass"
+      disabled={loading}
+      onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+    />
+  );
+
   return (
-    <div className="flex h-full w-full items-center justify-center">
-      <Card className="flex w-fit flex-col items-center justify-center">
+    <div className="flex h-full w-full items-center justify-center px-4 max-md:pb-24">
+      <Card className="flex w-full max-w-sm flex-col items-center justify-center max-md:border-0 max-md:shadow-none">
         <CardTitle>Who are you?</CardTitle>
-        <CardContent>
-          <div className="flex w-full max-w-sm flex-col items-center gap-2">
-            <p className="order-2 w-full">Email/Name</p>
-            <Input
-              className="order-3 w-full"
-              onChange={(e) => setEmail(e.target.value)}
-              value={email}
-              autoComplete="email"
-            />
-            <PasswordField
-              className="contents [&>div]:order-4 [&>svg]:order-1 [&_.text-xs]:sr-only"
-              value={password}
-              onValueChange={setPassword}
-              name={email.trim() || "guest"}
-              size={128}
-              label="Pass"
-              disabled={loading}
-              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-            />
+        <CardContent className="w-full">
+          <div className="flex w-full flex-col items-center gap-2">
+            {isMobile ? (
+              <>
+                <p className="w-full">Email/Name</p>
+                <Input
+                  className="w-full"
+                  onChange={(e) => setEmail(e.target.value)}
+                  value={email}
+                  autoComplete="email"
+                  inputMode="email"
+                />
+                {passwordField}
+              </>
+            ) : (
+              <>
+                <p className="order-2 w-full">Email/Name</p>
+                <Input
+                  className="order-3 w-full"
+                  onChange={(e) => setEmail(e.target.value)}
+                  value={email}
+                  autoComplete="email"
+                />
+                {passwordField}
+              </>
+            )}
           </div>
           {error ? (
             <p className="text-destructive mt-2 text-sm">{error}</p>

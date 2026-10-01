@@ -3,6 +3,14 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@layer base {
+  input[dir="auto"],
+  textarea[dir="auto"],
+  [contenteditable][dir="auto"] {
+    unicode-bidi: plaintext;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
