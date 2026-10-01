@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 import { del, issueSignedToken, presignUrl } from "@vercel/blob";
+import {
+  getBlobCommandOptions,
+  getBlobEnvDiagnostics,
+} from "@/lib/blob-config";
 import { connectMongoose } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
 import { UserModel } from "@/features/shared/models/user.model";
@@ -96,10 +100,34 @@ function isPrivateBlobUrl(url: string) {
 async function signImageUrls(images: PostImage[]): Promise<PostImage[]> {
   if (!images.some((image) => isPrivateBlobUrl(image.url))) return images;
 
+  const blobAuth = getBlobCommandOptions();
+  // #region agent log
+  fetch("http://127.0.0.1:7756/ingest/10478ca8-4ac3-4ae4-8a51-5aa285694454", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "cdb854",
+    },
+    body: JSON.stringify({
+      sessionId: "cdb854",
+      runId: "prod-blob",
+      hypothesisId: "G",
+      location: "myinsta.service.ts:signImageUrls",
+      message: "blob auth env",
+      data: {
+        ...getBlobEnvDiagnostics(),
+        hasBlobAuth: Boolean(blobAuth.storeId || blobAuth.token),
+      },
+      timestamp: Date.now(),
+    }),
+  }).catch(() => {});
+  // #endregion
+
   const token = await issueSignedToken({
     pathname: "*",
     operations: ["get"],
     validUntil: Date.now() + 60 * 60 * 1000,
+    ...blobAuth,
   });
 
   return Promise.all(
@@ -123,7 +151,7 @@ async function deleteBlobs(pathnames: string[]) {
   const unique = [...new Set(pathnames.filter(Boolean))];
   if (unique.length === 0) return;
   try {
-    await del(unique);
+    await del(unique, getBlobCommandOptions());
   } catch (error) {
     console.error("Could not delete blobs", error);
   }

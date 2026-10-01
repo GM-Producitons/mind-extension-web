@@ -76,7 +76,7 @@ When adding:
 ## MyInsta
 
 - Feed-only at `/myinsta`. Likes persist (`liked` boolean). Comments, share, and bookmark are visual only. No collections in v1.
-- Images upload to Vercel Blob via OIDC (`BLOB_STORE_ID` + `VERCEL_OIDC_TOKEN`, `handleUploadPresigned` at `/api/myinsta/upload`). Mongo stores URLs + pathnames only. Connect the store to Development or `vercel env pull` will not get Blob vars.
+- Images upload to Vercel Blob via OIDC (`BLOB_STORE_ID` or `ME_BLOB_STORE_ID` + `VERCEL_OIDC_TOKEN`, `handleUploadPresigned` at `/api/myinsta/upload`). Webhook key: `BLOB_WEBHOOK_PUBLIC_KEY` or `ME_BLOB_WEBHOOK_PUBLIC_KEY`. Mongo stores URLs + pathnames only. Store link must include Production and Preview, not only Development.
 - Private Blob URLs need signed GET links on read (`issueSignedToken` + `presignUrl`). Feed images use `next/image` with `unoptimized`.
 - Posts are filtered by `userId` from the auth cookie. Delete a post also deletes its Blob pathnames.
 
