@@ -1,4 +1,9 @@
-import type { BlobCommandOptions } from "@vercel/blob";
+/** Auth fields accepted by `issueSignedToken`, `del`, etc. (`BlobCommandOptions` is not public-exported). */
+export type BlobAuthOptions = {
+  token?: string;
+  oidcToken?: string;
+  storeId?: string;
+};
 
 /** Vercel may inject `ME_BLOB_*` from the store link; manual copies use `BLOB_*`. */
 export function getBlobStoreId(): string | undefined {
@@ -12,7 +17,7 @@ export function getBlobWebhookPublicKey(): string | undefined {
   );
 }
 
-export function getBlobCommandOptions(): BlobCommandOptions {
+export function getBlobCommandOptions(): BlobAuthOptions {
   const readWrite = process.env.BLOB_READ_WRITE_TOKEN;
   if (readWrite) {
     return { token: readWrite };

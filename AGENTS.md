@@ -85,3 +85,7 @@ When adding:
 - **Zustand** for client state shared across components. Not for a single widget's local open/closed or input state.
 - Server reads and writes go through the feature hook and its server actions. Do not add TanStack Query.
 - Effects that fetch or set state need a stable guard (cancelled flag or equivalent). Do not put a state update in an effect without one. Do not leave an effect or hook dependency that refetches or rerenders in a loop.
+
+## Typecheck and build
+
+- After substantive TypeScript edits, run `pnpm run build` (or at least the project’s `tsc`/lint step if build is too slow) and fix type errors before finishing. Do not import types from packages unless they are public exports.
