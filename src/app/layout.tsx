@@ -1,4 +1,6 @@
 import "./globals.css";
+import "blobatar/motion.css";
+import "blobatar/gaze.css";
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";

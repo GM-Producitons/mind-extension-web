@@ -2,6 +2,7 @@
 import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { PasswordField } from "@/components/ui/password-field";
 import { loginUser } from "../apis/userActions";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -31,7 +32,6 @@ export default function Login() {
 
     if (result.success && result.user) {
       setUser(result.user);
-      // Cookie is set server-side, just refresh so middleware lets us through
       router.refresh();
       router.push("/");
     } else {
@@ -41,28 +41,33 @@ export default function Login() {
   }
 
   return (
-    <div className="w-full h-full flex justify-center items-center">
-      <Card className="w-fit flex justify-center items-center">
+    <div className="flex h-full w-full items-center justify-center">
+      <Card className="flex w-fit flex-col items-center justify-center">
         <CardTitle>Who are you?</CardTitle>
         <CardContent>
-          <div className="flex flex-col items-center space-y-2">
-            <p>Email/Name</p>
+          <div className="flex w-full max-w-sm flex-col items-center gap-2">
+            <p className="order-2 w-full">Email/Name</p>
             <Input
+              className="order-3 w-full"
               onChange={(e) => setEmail(e.target.value)}
               value={email}
               autoComplete="email"
             />
-            <p>Pass</p>
-            <Input
-              type="password"
-              onChange={(e) => setPassword(e.target.value)}
+            <PasswordField
+              className="contents [&>div]:order-4 [&>svg]:order-1 [&_.text-xs]:sr-only"
               value={password}
+              onValueChange={setPassword}
+              name={email.trim() || "guest"}
+              size={128}
+              label="Pass"
               disabled={loading}
               onKeyDown={(e) => e.key === "Enter" && handleLogin()}
             />
-            {error && <p className="text-red-500 text-sm">{error}</p>}
           </div>
-          <div className="flex gap-2 mt-4">
+          {error ? (
+            <p className="text-destructive mt-2 text-sm">{error}</p>
+          ) : null}
+          <div className="mt-4 flex gap-2">
             <Button onClick={handleLogin} disabled={loading} className="flex-1">
               {loading ? "Logging in..." : "Login"}
             </Button>
