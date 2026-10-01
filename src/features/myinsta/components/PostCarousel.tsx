@@ -17,6 +17,37 @@ interface PostCarouselProps {
   alt: string;
 }
 
+function CarouselSlideImage({ image, alt }: { image: PostImage; alt: string }) {
+  const hasDims =
+    typeof image.width === "number" &&
+    image.width > 0 &&
+    typeof image.height === "number" &&
+    image.height > 0;
+  const [dims, setDims] = useState(
+    hasDims ? { width: image.width!, height: image.height! } : null,
+  );
+
+  const width = dims?.width ?? 1200;
+  const height = dims?.height ?? 800;
+
+  return (
+    <Image
+      src={image.url}
+      alt={alt}
+      width={width}
+      height={height}
+      unoptimized
+      className="block w-full h-auto"
+      sizes="470px"
+      onLoad={(event) => {
+        if (hasDims) return;
+        const img = event.currentTarget;
+        setDims({ width: img.naturalWidth, height: img.naturalHeight });
+      }}
+    />
+  );
+}
+
 export function PostCarousel({ images, alt }: PostCarouselProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -41,21 +72,14 @@ export function PostCarousel({ images, alt }: PostCarouselProps) {
       <div
         ref={scrollerRef}
         onScroll={onScroll}
-        className="flex aspect-[4/5] snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {images.map((image) => (
           <div
             key={image.pathname}
-            className="relative min-w-full w-full shrink-0 snap-center"
+            className="min-w-full w-full shrink-0 snap-center"
           >
-            <Image
-              src={image.url}
-              alt={alt}
-              fill
-              unoptimized
-              className="object-cover"
-              sizes="470px"
-            />
+            <CarouselSlideImage image={image} alt={alt} />
           </div>
         ))}
       </div>
