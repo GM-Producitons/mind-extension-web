@@ -5,13 +5,7 @@ import { PageHeader } from "@/features/shared/template/page-header";
 import { useDayPlan } from "../hooks/use-day-plan";
 import { useScheduleDashboard } from "../hooks/use-schedule-dashboard";
 import { DayPlanSection } from "./DayPlanSection";
-import {
-  FlashcardsWidget,
-  MissionsRadial,
-  MoneySankey,
-  PostsAreaChart,
-  TestosteroneMeter,
-} from "./ScheduleWidgets";
+import { AnalysisCollage } from "./ScheduleWidgets";
 import { BucketListPhysics } from "./BucketListPhysics";
 
 export function SchedulePage() {
@@ -33,11 +27,11 @@ export function SchedulePage() {
         <p className="px-3 py-4 text-xs text-muted-foreground">No plan available.</p>
       )}
 
-      <TestosteroneMeter />
-      <MissionsRadial missions={plan?.missions ?? []} />
-      <MoneySankey />
-      <FlashcardsWidget stats={flashcards} />
-      <PostsAreaChart weeks={postsPerWeek} />
+      <AnalysisCollage
+        missions={plan?.missions ?? []}
+        stats={flashcards}
+        weeks={postsPerWeek}
+      />
       <BucketListPhysics />
     </main>
     </TooltipProvider>

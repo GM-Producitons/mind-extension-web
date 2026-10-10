@@ -67,6 +67,17 @@ export function DayPlanSection({ plan, isFallback }: DayPlanSectionProps) {
           </div>
         ) : null}
 
+        <p className="flex gap-3 text-[10px] text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <span className="inline-block h-2 w-3 bg-muted" />
+            Buffer
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="inline-block h-2 w-3 bg-destructive/30" />
+            Free
+          </span>
+        </p>
+
         {(plan.cut_first?.length ?? 0) > 0 ? (
           <div className="text-xs">
             <p className="font-medium text-muted-foreground">Cut first</p>

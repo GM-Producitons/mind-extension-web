@@ -45,7 +45,7 @@ export async function getPostsPerWeek(limitWeeks = 8): Promise<PostsPerWeek[]> {
       {
         $group: {
           _id: {
-            $dateToString: { format: "%Y-%W", date: "$createdAt" },
+            $dateToString: { format: "%G-W%V", date: "$createdAt" },
           },
           count: { $sum: 1 },
         },

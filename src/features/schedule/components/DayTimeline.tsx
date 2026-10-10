@@ -6,6 +6,7 @@ import {
   blockHeightPx,
   blockTopPx,
   blockTypeClass,
+  endMinute,
   parseHm,
   timelineOriginMinutes,
   PX_PER_MINUTE,
@@ -17,7 +18,13 @@ interface DayTimelineProps {
   plan: DayPlan;
 }
 
-function SkippedGhost({
+function rangeStyle(start: string, end: string, originMinutes: number) {
+  const top = (parseHm(start) - originMinutes) * PX_PER_MINUTE;
+  const height = Math.max((endMinute(start, end) - parseHm(start)) * PX_PER_MINUTE, 1);
+  return { top, height };
+}
+
+function SkippedMark({
   item,
   originMinutes,
 }: {
@@ -26,24 +33,20 @@ function SkippedGhost({
 }) {
   const start = item.start.includes("T") ? item.start.slice(11, 16) : item.start;
   const end = item.end.includes("T") ? item.end.slice(11, 16) : item.end;
-  const block: Block = {
-    start,
-    end,
-    title: item.title,
-    type: "buffer",
-    drain: 0,
-    note: item.reason,
-  };
-  const top = blockTopPx(block, originMinutes);
-  const height = blockHeightPx(block);
-
+  const { top, height } = rangeStyle(start, end, originMinutes);
   return (
     <div
-      className="absolute left-12 right-2 border border-dashed border-muted-foreground/40 bg-muted/10 px-2 py-1 opacity-60"
-      style={{ top, height: Math.max(height, 28) }}
+      className="absolute right-0 left-11 flex items-center px-2"
+      style={{ top, height }}
     >
-      <p className="line-through text-xs text-muted-foreground">{item.title}</p>
-      <p className="text-[10px] text-muted-foreground">{item.reason}</p>
+      {height >= 16 ? (
+        <p className="truncate text-[10px] text-muted-foreground line-through">
+          <span className="font-mono">
+            {start}–{end}
+          </span>{" "}
+          {item.title}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -58,24 +61,22 @@ export function DayTimeline({ plan }: DayTimelineProps) {
   );
 
   const maxEnd = useMemo(() => {
-    const ends = plan.blocks.map((b) => {
-      let end = parseHm(b.end);
-      const start = parseHm(b.start);
-      if (end <= start) end += 24 * 60;
-      return end;
-    });
+    const ends = plan.blocks.map((block) => endMinute(block.start, block.end));
     return Math.max(...ends, originMinutes + 60);
   }, [plan.blocks, originMinutes]);
 
-  const totalHeight = (maxEnd - originMinutes) * PX_PER_MINUTE + 24;
+  const totalHeight = (maxEnd - originMinutes) * PX_PER_MINUTE;
 
   const hourMarks = useMemo(() => {
     const startHour = Math.floor(originMinutes / 60);
     const endHour = Math.ceil(maxEnd / 60);
     const marks: number[] = [];
-    for (let h = startHour; h <= endHour; h++) marks.push(h);
+    for (let hour = startHour; hour <= endHour; hour++) marks.push(hour);
     return marks;
   }, [originMinutes, maxEnd]);
+
+  const buffers = plan.blocks.filter((block) => block.type === "buffer");
+  const blocks = plan.blocks.filter((block) => block.type !== "buffer");
 
   const openBlock = (block: Block) => {
     setSelected(block);
@@ -84,17 +85,43 @@ export function DayTimeline({ plan }: DayTimelineProps) {
 
   return (
     <>
-      <div className="relative border-b border-border bg-background">
+      <div className="relative border-b border-border">
         <div className="relative" style={{ height: totalHeight }}>
+          <div className="absolute top-0 right-0 bottom-0 left-11 bg-destructive/15" />
+
+          {buffers.map((block, index) => {
+            const top = blockTopPx(block, originMinutes);
+            const height = blockHeightPx(block);
+            return (
+              <button
+                key={`buffer-${block.start}-${index}`}
+                type="button"
+                onClick={() => openBlock(block)}
+                className="absolute right-0 left-11 bg-muted text-left"
+                style={{ top, height }}
+                aria-label={`${block.start}–${block.end} ${block.title}`}
+              >
+                {height >= 16 ? (
+                  <span className="block truncate px-2 text-[10px] leading-4 text-muted-foreground">
+                    <span className="font-mono">
+                      {block.start}–{block.end}
+                    </span>{" "}
+                    {block.title}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+
           {hourMarks.map((hour) => {
             const top = (hour * 60 - originMinutes) * PX_PER_MINUTE;
             return (
               <div
                 key={hour}
-                className="absolute left-0 right-0 border-t border-border/50"
+                className="pointer-events-none absolute right-0 left-0 border-t border-border/40"
                 style={{ top }}
               >
-                <span className="absolute left-1 top-0 -translate-y-1/2 font-mono text-[10px] text-muted-foreground">
+                <span className="absolute top-0 left-1 -translate-y-1/2 bg-background font-mono text-[10px] text-muted-foreground">
                   {hour.toString().padStart(2, "0")}:00
                 </span>
               </div>
@@ -102,29 +129,31 @@ export function DayTimeline({ plan }: DayTimelineProps) {
           })}
 
           {(plan.skipped ?? []).map((item) => (
-            <SkippedGhost key={item.id} item={item} originMinutes={originMinutes} />
+            <SkippedMark key={item.id} item={item} originMinutes={originMinutes} />
           ))}
 
-          {plan.blocks.map((block, index) => {
+          {blocks.map((block, index) => {
             const top = blockTopPx(block, originMinutes);
-            const height = Math.max(blockHeightPx(block), 32);
+            const height = blockHeightPx(block);
             return (
               <button
                 key={`${block.start}-${block.title}-${index}`}
                 type="button"
                 onClick={() => openBlock(block)}
                 className={cn(
-                  "absolute left-12 right-2 overflow-hidden border px-2 py-1 text-left",
+                  "absolute right-1 left-12 flex items-center overflow-hidden border px-2 text-left",
                   blockTypeClass(block.type),
                 )}
                 style={{ top, height }}
               >
-                <p className="text-xs font-medium leading-tight text-foreground">
-                  {block.title}
-                </p>
-                <p className="font-mono text-[10px] text-muted-foreground">
-                  {block.start}–{block.end}
-                </p>
+                {height >= 16 ? (
+                  <p className="truncate text-xs whitespace-nowrap text-foreground">
+                    <span className="font-mono text-muted-foreground">
+                      {block.start}–{block.end}
+                    </span>{" "}
+                    {block.title}
+                  </p>
+                ) : null}
               </button>
             );
           })}

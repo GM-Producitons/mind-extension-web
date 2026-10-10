@@ -8,11 +8,15 @@ export function parseHm(time: string): number {
   return h * 60 + m;
 }
 
+export function endMinute(start: string, end: string): number {
+  const startMinute = parseHm(start);
+  let endMinuteValue = parseHm(end);
+  if (endMinuteValue <= startMinute) endMinuteValue += 24 * 60;
+  return endMinuteValue;
+}
+
 export function blockDurationMinutes(block: Block): number {
-  const start = parseHm(block.start);
-  let end = parseHm(block.end);
-  if (end <= start) end += 24 * 60;
-  return Math.max(end - start, 5);
+  return Math.max(endMinute(block.start, block.end) - parseHm(block.start), 1);
 }
 
 export function timelineOriginMinutes(blocks: Block[]): number {
