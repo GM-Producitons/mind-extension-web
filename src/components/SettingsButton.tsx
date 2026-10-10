@@ -19,6 +19,7 @@ import {
   Bell,
   LogOut,
   CalendarDays,
+  Users,
 } from "lucide-react";
 import {
   Drawer,
@@ -30,6 +31,7 @@ import { SettingsModal } from "@/features/settings/SettingsModal";
 import { logoutUser } from "@/features/login/apis/userActions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { MobileDock } from "@/components/MobileDock";
 
 interface App {
   name: string;
@@ -95,6 +97,11 @@ export default function SettingsButton() {
       name: "MyInsta",
       icon: <Instagram className="h-5 w-5" />,
       href: "/myinsta",
+    },
+    {
+      name: "People",
+      icon: <Users className="h-5 w-5" />,
+      href: "/people",
     },
     {
       name: mounted && theme === "dark" ? "Light Mode" : "Dark Mode",
@@ -255,20 +262,28 @@ export default function SettingsButton() {
     </div>
   );
 
+  if (isMobile) {
+    return (
+      <>
+        <MobileDock apps={apps} onApp={(app) => void runAppAction(app)} />
+        <SettingsModal
+          isOpen={notificationModalOpen}
+          onClose={() => setNotificationModalOpen(false)}
+        />
+      </>
+    );
+  }
+
   return (
     <>
-      {isMobile ? (
-        shell
-      ) : (
-        <Draggable
-          nodeRef={dragNodeRef}
-          handle=".settings-fab-handle"
-          onStart={onDragStart}
-          onDrag={onDrag}
-        >
-          {shell}
-        </Draggable>
-      )}
+      <Draggable
+        nodeRef={dragNodeRef}
+        handle=".settings-fab-handle"
+        onStart={onDragStart}
+        onDrag={onDrag}
+      >
+        {shell}
+      </Draggable>
       <SettingsModal
         isOpen={notificationModalOpen}
         onClose={() => setNotificationModalOpen(false)}

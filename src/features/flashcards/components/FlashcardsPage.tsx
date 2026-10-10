@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { ConfirmDialog } from "@/features/shared/template/confirm-dialog";
+import { useQuickCreate } from "@/features/shared/store/quick-create.store";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useFlashcardsPage } from "../hooks/use-flashcards-page";
 import { ClusterCard } from "./ClusterCard";
@@ -10,6 +12,13 @@ import { FlashcardsHeader } from "./FlashcardsHeader";
 
 export function FlashcardsPage() {
   const page = useFlashcardsPage();
+  const pending = useQuickCreate((state) => state.pending);
+
+  useEffect(() => {
+    if (pending !== "card") return;
+    page.openCreateCard();
+    useQuickCreate.getState().clear();
+  }, [pending, page]);
 
   return (
     <TooltipProvider>

@@ -11,12 +11,21 @@ import {
 import { ConfirmDialog } from "@/features/shared/template/confirm-dialog";
 import { EmptyState } from "@/features/shared/template/empty-state";
 import { PageHeader } from "@/features/shared/template/page-header";
+import { useEffect } from "react";
+import { useQuickCreate } from "@/features/shared/store/quick-create.store";
 import { useMyInstaFeed } from "../hooks/use-myinsta-feed";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { FeedList } from "./FeedList";
 
 export function MyInstaPage() {
   const page = useMyInstaFeed();
+  const pending = useQuickCreate((state) => state.pending);
+
+  useEffect(() => {
+    if (pending !== "post") return;
+    page.create.setOpen(true);
+    useQuickCreate.getState().clear();
+  }, [pending, page.create]);
 
   return (
     <TooltipProvider>
