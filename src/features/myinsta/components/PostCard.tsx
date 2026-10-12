@@ -137,7 +137,7 @@ export function PostCard({ post, onLike, onDelete }: PostCardProps) {
       )}
 
       {post.caption.trim() && (
-        <p className="px-3 pt-0.5 text-sm">
+        <p className="line-clamp-3 px-3 pt-0.5 text-sm whitespace-pre-line">
           <span className="font-semibold">{post.username}</span>{" "}
           {post.caption}
         </p>
