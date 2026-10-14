@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/drawer";
 import { CreatePersonDrawer } from "@/features/people/components/CreatePersonDrawer";
 import { PersonEntryDrawer } from "@/features/people/components/PersonEntryDrawer";
-import { useQuickCreate } from "@/features/shared/store/quick-create.store";
+import { queueQuickCreate } from "@/features/shared/store/quick-create.store";
 
 interface DockApp {
   name: string;
@@ -58,7 +58,7 @@ export function MobileDock({ apps, onApp }: MobileDockProps) {
 
   const openCreate = (kind: "post" | "card", href: string) => {
     setQuickOpen(false);
-    useQuickCreate.getState().request(kind);
+    queueQuickCreate(kind);
     router.push(href);
   };
 

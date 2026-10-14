@@ -12,8 +12,8 @@ import { ConfirmDialog } from "@/features/shared/template/confirm-dialog";
 import { EmptyState } from "@/features/shared/template/empty-state";
 import { PageHeader } from "@/features/shared/template/page-header";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
-import { useQuickCreate } from "@/features/shared/store/quick-create.store";
+import { useLayoutEffect, useRef } from "react";
+import { hasQuickCreate, useQuickCreate } from "@/features/shared/store/quick-create.store";
 import { useMyInstaFeed } from "../hooks/use-myinsta-feed";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { FeedList } from "./FeedList";
@@ -21,12 +21,13 @@ import { FeedList } from "./FeedList";
 export function MyInstaPage() {
   const page = useMyInstaFeed();
   const pending = useQuickCreate((state) => state.pending);
+  const openPostRef = useRef(page.create.setOpen);
+  openPostRef.current = page.create.setOpen;
 
-  useEffect(() => {
-    if (pending !== "post") return;
-    page.create.setOpen(true);
-    useQuickCreate.getState().clear();
-  }, [pending, page.create]);
+  useLayoutEffect(() => {
+    if (pending !== "post" && !hasQuickCreate("post")) return;
+    openPostRef.current(true);
+  }, [pending]);
 
   return (
     <TooltipProvider>

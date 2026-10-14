@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { sync } from "@/features/offline/sync";
 import { readValidSession, writeSessionSnapshot } from "@/features/offline/session";
 import { useOfflineSync } from "@/features/offline/sync-store";
+import { clearQuickCreate } from "@/features/shared/store/quick-create.store";
 import { sessionSnapshotAction } from "../actions/myinsta.actions";
 import { saveDraftPost, countOutbox } from "../lib/local-feed";
 import {
@@ -55,7 +56,10 @@ export function useCreatePost({ onCreated }: UseCreatePostOptions) {
   const setOpenSafe = (next: boolean) => {
     if (isSubmitting) return;
     setOpen(next);
-    if (!next) reset();
+    if (!next) {
+      clearQuickCreate("post");
+      reset();
+    }
   };
 
   const addFiles = (incoming: File[]) => {
@@ -122,6 +126,7 @@ export function useCreatePost({ onCreated }: UseCreatePostOptions) {
         .getState()
         .setPendingCount(await countOutbox(session.userId));
       onCreated(post);
+      clearQuickCreate("post");
       setOpen(false);
       reset();
 

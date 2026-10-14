@@ -80,6 +80,8 @@ When adding:
 - Private Blob URLs need signed GET links on read (`issueSignedToken` + `presignUrl`). Feed images use `next/image` with `unoptimized`.
 - Posts are filtered by `userId` from the auth cookie. Delete a post also deletes its Blob pathnames.
 - Offline is local-first for viewing and creating posts. Opening MyInsta while online copies posts and image bytes into IndexedDB. New posts save locally and go on the outbox (`kind: myinsta.create`) until `sync()`. Mongo creates use `clientId` so a retry does not duplicate. Likes and deletes stay online-only. A later feature adds an outbox handler; it does not add another database.
+- When a navigation cannot load offline, the service worker serves `public/offline.html`. That page lists only offline-capable features. Add a link there when another feature works offline. Home (`/` and `/dashboard`) uses that page while offline.
+- The mobile + → Post action stores `me-quick-create` until the create dialog closes, so the dialog still opens after the route change.
 
 ## Client state
 

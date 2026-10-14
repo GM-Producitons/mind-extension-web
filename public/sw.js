@@ -1,11 +1,27 @@
-const CACHE = "me-shell-v1";
+const CACHE = "me-shell-v2";
+const OFFLINE_URL = "/offline.html";
+const HOME_PATHS = new Set(["/", "/dashboard", "/offline", "/offline.html"]);
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(self.skipWaiting());
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) => cache.add(OFFLINE_URL))
+      .then(() => self.skipWaiting()),
+  );
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)),
+        ),
+      )
+      .then(() => self.clients.claim()),
+  );
 });
 
 self.addEventListener("fetch", (event) => {
@@ -22,7 +38,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.mode === "navigate") {
-    event.respondWith(networkFirst(request));
+    event.respondWith(networkFirst(request, url.pathname));
   }
 });
 
@@ -35,18 +51,25 @@ async function cacheFirst(request) {
   return response;
 }
 
-async function networkFirst(request) {
+async function networkFirst(request, pathname) {
   const cache = await caches.open(CACHE);
   try {
     const response = await fetch(request);
-    if (response.ok) await cache.put(request, response.clone());
+    if (response.ok && !HOME_PATHS.has(pathname)) {
+      await cache.put(request, response.clone());
+    }
     return response;
   } catch {
+    if (HOME_PATHS.has(pathname)) return offlinePage();
     const cached = await cache.match(request);
     if (cached) return cached;
-    return new Response("Offline", {
-      status: 503,
-      headers: { "Content-Type": "text/plain" },
-    });
+    return offlinePage();
   }
+}
+
+async function offlinePage() {
+  const cache = await caches.open(CACHE);
+  const cached = await cache.match(OFFLINE_URL);
+  if (cached) return cached;
+  return fetch(OFFLINE_URL);
 }
