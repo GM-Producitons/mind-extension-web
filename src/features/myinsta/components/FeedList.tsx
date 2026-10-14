@@ -1,12 +1,12 @@
 "use client";
 
-import type { MyInstaPost } from "../types";
+import type { FeedPost } from "../types";
 import { PostCard } from "./PostCard";
 
 interface FeedListProps {
-  posts: MyInstaPost[];
+  posts: FeedPost[];
   onLike: (id: string) => void;
-  onDelete: (post: MyInstaPost) => void;
+  onDelete: (post: FeedPost) => void;
 }
 
 export function FeedList({ posts, onLike, onDelete }: FeedListProps) {
@@ -14,7 +14,7 @@ export function FeedList({ posts, onLike, onDelete }: FeedListProps) {
     <div>
       {posts.map((post) => (
         <PostCard
-          key={post._id}
+          key={post.clientId}
           post={post}
           onLike={() => onLike(post._id)}
           onDelete={() => onDelete(post)}

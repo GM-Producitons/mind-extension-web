@@ -49,6 +49,29 @@ function CarouselSlideImage({
   alt: string;
   onDims: (pathname: string, dims: ImageDims) => void;
 }) {
+  if (!image.url) return null;
+
+  const onLoad = (event: { currentTarget: HTMLImageElement }) => {
+    const img = event.currentTarget;
+    onDims(image.pathname, {
+      width: img.naturalWidth,
+      height: img.naturalHeight,
+    });
+  };
+
+  if (image.url.startsWith("blob:")) {
+    return (
+      // Local drafts and cached files are device blobs, not remote URLs.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={image.url}
+        alt={alt}
+        className="absolute inset-0 size-full object-contain object-center"
+        onLoad={onLoad}
+      />
+    );
+  }
+
   return (
     <Image
       src={image.url}
@@ -57,13 +80,7 @@ function CarouselSlideImage({
       unoptimized
       className="object-contain object-center"
       sizes="470px"
-      onLoad={(event) => {
-        const img = event.currentTarget;
-        onDims(image.pathname, {
-          width: img.naturalWidth,
-          height: img.naturalHeight,
-        });
-      }}
+      onLoad={onLoad}
     />
   );
 }

@@ -5,6 +5,7 @@ import {
   deletePostService,
   discardUploadsService,
   listPostsService,
+  sessionSnapshotService,
   toggleLikeService,
 } from "../services/myinsta.service";
 import type { ActionResult, CreatePostInput } from "../types";
@@ -35,6 +36,10 @@ export async function toggleLikeAction(id: string) {
 
 export async function deletePostAction(id: string) {
   return run(() => deletePostService(id), "Could not delete post");
+}
+
+export async function sessionSnapshotAction() {
+  return run(sessionSnapshotService, "Not authenticated");
 }
 
 export async function discardUploadsAction(pathnames: string[]) {

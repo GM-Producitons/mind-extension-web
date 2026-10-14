@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/drawer";
 import { SettingsModal } from "@/features/settings/SettingsModal";
 import { logoutUser } from "@/features/login/apis/userActions";
+import { clearSessionSnapshot } from "@/features/offline/session";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { MobileDock } from "@/components/MobileDock";
@@ -119,6 +120,7 @@ export default function SettingsButton() {
       href: "/login",
       onClickFunction: async () => {
         await logoutUser();
+        await clearSessionSnapshot();
         router.replace("/login");
         router.refresh();
       },

@@ -11,6 +11,7 @@ import {
   createPostRecord,
   deletePostRecord,
   getPostRecord,
+  hasOwnedImage,
   listPostRecords,
   toggleLikeRecord,
 } from "../lib/myinsta.repository";
@@ -176,12 +177,16 @@ export async function createPostService(
   }
 
   const caption = typeof input.caption === "string" ? input.caption.trim() : "";
+  const clientId =
+    typeof input.clientId === "string" ? input.clientId.trim() : "";
+  if (clientId.length > 80) return { success: false, error: "Post is invalid" };
   const images = normalizeImages(input.images);
   if ("error" in images) return { success: false, error: images.error };
 
   const created = await createPostRecord(user.data.userId, user.data.username, {
     caption,
     images,
+    clientId: clientId || undefined,
   });
   return { success: true, data: await withSignedImages(created) };
 }
@@ -215,6 +220,28 @@ export async function deletePostService(
   await deletePostRecord(id, user.data.userId);
   await deleteBlobs(existing.images.map((image) => image.pathname));
   return { success: true, data: null };
+}
+
+export async function sessionSnapshotService(): Promise<
+  ActionResult<{ userId: string; username: string }>
+> {
+  return requireUser();
+}
+
+export async function ownedImagePathService(
+  pathname: string,
+): Promise<ActionResult<string>> {
+  const user = await requireUser();
+  if (!user.success || !user.data) {
+    return { success: false, error: user.error ?? "Not authenticated" };
+  }
+  const trimmed = typeof pathname === "string" ? pathname.trim() : "";
+  if (!trimmed || trimmed.includes("..") || trimmed.startsWith("/")) {
+    return { success: false, error: "Image is invalid" };
+  }
+  const owned = await hasOwnedImage(user.data.userId, trimmed);
+  if (!owned) return { success: false, error: "Image is invalid" };
+  return { success: true, data: trimmed };
 }
 
 export async function discardUploadsService(

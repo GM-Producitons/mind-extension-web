@@ -17,6 +17,7 @@ interface RawPost {
   caption?: string;
   images?: RawImage[];
   liked?: boolean;
+  clientId?: unknown;
   createdAt: Date | string;
   updatedAt: Date | string;
 }
@@ -50,8 +51,14 @@ function asPost(doc: RawPost): MyInstaPost {
     .filter((image): image is PostImage => image != null)
     .sort((a, b) => a.order - b.order);
 
+  const clientId =
+    typeof doc.clientId === "string" && doc.clientId.trim()
+      ? doc.clientId.trim()
+      : undefined;
+
   return {
     _id: String(doc._id),
+    clientId,
     userId: String(doc.userId),
     username: doc.username,
     caption: doc.caption ?? "",
@@ -70,20 +77,59 @@ export async function listPostRecords(userId: string) {
   return toPlain(docs).map(asPost);
 }
 
+function isDuplicateKey(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error != null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === 11000
+  );
+}
+
 export async function createPostRecord(
   userId: string,
   username: string,
   input: CreatePostInput,
 ) {
   await connectMongoose();
-  const doc = await MyInstaPostModel.create({
+  const clientId = input.clientId?.trim() || undefined;
+
+  if (clientId) {
+    const existing = await MyInstaPostModel.findOne({ userId, clientId }).lean();
+    if (existing) return asPost(toPlain(existing));
+  }
+
+  try {
+    const doc = await MyInstaPostModel.create({
+      userId,
+      username,
+      caption: input.caption,
+      images: input.images,
+      liked: false,
+      ...(clientId ? { clientId } : {}),
+    });
+    return asPost(toPlain(doc.toObject()));
+  } catch (error) {
+    if (clientId && isDuplicateKey(error)) {
+      const existing = await MyInstaPostModel.findOne({
+        userId,
+        clientId,
+      }).lean();
+      if (existing) return asPost(toPlain(existing));
+    }
+    throw error;
+  }
+}
+
+export async function hasOwnedImage(userId: string, pathname: string) {
+  await connectMongoose();
+  const doc = await MyInstaPostModel.findOne({
     userId,
-    username,
-    caption: input.caption,
-    images: input.images,
-    liked: false,
-  });
-  return asPost(toPlain(doc.toObject()));
+    "images.pathname": pathname,
+  })
+    .select("_id")
+    .lean();
+  return doc != null;
 }
 
 export async function getPostRecord(id: string, userId: string) {

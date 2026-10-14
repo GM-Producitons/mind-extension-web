@@ -1,49 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { uploadPresigned } from "@vercel/blob/client";
 import { toast } from "sonner";
-import {
-  createPostAction,
-  discardUploadsAction,
-} from "../actions/myinsta.actions";
+import { sync } from "@/features/offline/sync";
+import { readValidSession, writeSessionSnapshot } from "@/features/offline/session";
+import { useOfflineSync } from "@/features/offline/sync-store";
+import { sessionSnapshotAction } from "../actions/myinsta.actions";
+import { saveDraftPost, countOutbox } from "../lib/local-feed";
 import {
   ALLOWED_IMAGE_TYPES,
   MAX_IMAGE_BYTES,
   MAX_IMAGES,
-  type MyInstaPost,
-  type PostImage,
+  type FeedPost,
 } from "../types";
 
 type CreateStep = "pick" | "caption";
 
 interface UseCreatePostOptions {
-  onCreated: (post: MyInstaPost) => void;
+  onCreated: (post: FeedPost) => void;
 }
 
 function isAllowedFile(file: File) {
   return (ALLOWED_IMAGE_TYPES as readonly string[]).includes(file.type);
-}
-
-function readImageSize(file: File) {
-  return new Promise<{ width: number; height: number }>((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const image = new Image();
-    image.onload = () => {
-      resolve({ width: image.naturalWidth, height: image.naturalHeight });
-      URL.revokeObjectURL(url);
-    };
-    image.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error("Could not read image"));
-    };
-    image.src = url;
-  });
-}
-
-function safeFileName(name: string) {
-  const trimmed = name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 80);
-  return trimmed.length > 0 ? trimmed : "image";
 }
 
 function revokeAll(urls: string[]) {
@@ -120,51 +98,46 @@ export function useCreatePost({ onCreated }: UseCreatePostOptions) {
     }
 
     setIsSubmitting(true);
-    const uploaded: PostImage[] = [];
-
     try {
-      for (const [index, file] of files.entries()) {
-        const size = await readImageSize(file).catch(() => ({
-          width: undefined as number | undefined,
-          height: undefined as number | undefined,
-        }));
-        const blob = await uploadPresigned(
-          `myinsta/${safeFileName(file.name)}`,
-          file,
-          {
-            access: "private",
-            handleUploadUrl: "/api/myinsta/upload",
-          },
-        );
-        uploaded.push({
-          url: blob.url,
-          pathname: blob.pathname,
-          width: size.width,
-          height: size.height,
-          order: index,
-        });
+      let session = await readValidSession();
+      if (!session && navigator.onLine) {
+        const snapshot = await sessionSnapshotAction();
+        if (snapshot.success && snapshot.data) {
+          await writeSessionSnapshot(snapshot.data);
+          session = await readValidSession();
+        }
       }
-
-      const result = await createPostAction({
-        caption,
-        images: uploaded,
-      });
-
-      if (!result.success || !result.data) {
-        await discardUploadsAction(uploaded.map((image) => image.pathname));
-        toast.error(result.error ?? "Could not create post");
+      if (!session) {
+        toast.error("Sign in while online");
         return;
       }
 
-      toast.success("Posted");
-      onCreated(result.data);
+      const post = await saveDraftPost({
+        userId: session.userId,
+        username: session.username,
+        caption,
+        files,
+      });
+      useOfflineSync
+        .getState()
+        .setPendingCount(await countOutbox(session.userId));
+      onCreated(post);
       setOpen(false);
       reset();
+
+      if (!navigator.onLine) {
+        toast.success("Saved on device");
+        return;
+      }
+
+      let result = await sync();
+      if (!result.synced.includes(post.clientId)) {
+        result = await sync();
+      }
+      if (result.synced.includes(post.clientId)) toast.success("Posted");
+      else toast.success("Saved on device");
     } catch (error) {
-      await discardUploadsAction(uploaded.map((image) => image.pathname));
-      toast.error(
-        error instanceof Error ? error.message : "Could not upload images",
-      );
+      toast.error(error instanceof Error ? error.message : "Could not save post");
     } finally {
       setIsSubmitting(false);
     }

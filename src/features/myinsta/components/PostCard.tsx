@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { formatDistanceToNow } from "date-fns";
 import {
   Bookmark,
@@ -21,11 +21,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { MyInstaPost } from "../types";
+import type { FeedPost } from "../types";
 import { PostCarousel } from "./PostCarousel";
 
 interface PostCardProps {
-  post: MyInstaPost;
+  post: FeedPost;
   onLike: () => void;
   onDelete: () => void;
 }
@@ -67,6 +67,7 @@ function IconAction({
 }
 
 export function PostCard({ post, onLike, onDelete }: PostCardProps) {
+  const [expanded, setExpanded] = useState(false);
   const initial = post.username.trim().charAt(0).toUpperCase() || "M";
   const alt = post.caption.trim() || "Post";
 
@@ -137,10 +138,20 @@ export function PostCard({ post, onLike, onDelete }: PostCardProps) {
       )}
 
       {post.caption.trim() && (
-        <p className="line-clamp-3 px-3 pt-0.5 text-sm whitespace-pre-line">
-          <span className="font-semibold">{post.username}</span>{" "}
-          {post.caption}
-        </p>
+        <button
+          type="button"
+          className="w-full cursor-pointer px-3 pt-0.5 text-left text-sm whitespace-pre-line"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((open) => !open)}
+        >
+          <span className={cn("block", !expanded && "line-clamp-3")}>
+            <span className="font-semibold">{post.username}</span> {post.caption}
+          </span>
+        </button>
+      )}
+
+      {post.pending && (
+        <p className="px-3 pt-1 text-xs text-muted-foreground">Saved on device</p>
       )}
 
       <p className="px-3 pt-1 text-[11px] uppercase tracking-wide text-muted-foreground">

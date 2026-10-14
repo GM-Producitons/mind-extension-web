@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import BackgroundProvider from "@/components/BackgroundProvider";
 import GenTimeline from "@/features/timeline/components/GenTimeline";
 import type { TimelineEvent } from "@/features/timeline/models/timeline_event";
+import { FIREBASE_MESSAGING_SCOPE } from "@/features/offline/constants";
+import { releaseRootFirebaseWorker } from "@/features/offline/service-worker";
 
 interface SubApp {
   id: string;
@@ -235,16 +237,19 @@ export default function Dashboard({
   onEventClick,
 }: DashboardProps) {
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
+    void releaseRootFirebaseWorker().then(() => {
+      if (!("serviceWorker" in navigator)) return;
       navigator.serviceWorker
-        .register("/firebase-messaging-sw.js")
+        .register("/firebase-messaging-sw.js", {
+          scope: FIREBASE_MESSAGING_SCOPE,
+        })
         .then((registration) => {
           console.log("Service Worker registered:", registration);
         })
         .catch((err) => {
           console.error("Service Worker registration failed:", err);
         });
-    }
+    });
   }, []);
 
   return (

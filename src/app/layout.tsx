@@ -36,6 +36,7 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "MindExtension",
   },
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({

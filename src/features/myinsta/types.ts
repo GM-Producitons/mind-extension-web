@@ -25,6 +25,7 @@ export interface PostImage {
 
 export interface MyInstaPost {
   _id: string;
+  clientId?: string;
   userId: string;
   username: string;
   caption: string;
@@ -34,7 +35,13 @@ export interface MyInstaPost {
   updatedAt: string;
 }
 
+export interface FeedPost extends MyInstaPost {
+  clientId: string;
+  pending: boolean;
+}
+
 export interface CreatePostInput {
   caption: string;
   images: PostImage[];
+  clientId?: string;
 }

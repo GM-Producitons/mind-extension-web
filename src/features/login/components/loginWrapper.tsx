@@ -7,6 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { loginUser } from "../apis/userActions";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { writeSessionSnapshot } from "@/features/offline/session";
 import { useUserStore } from "@/features/user_management/store/userStore";
 
 export default function Login() {
@@ -33,6 +34,15 @@ export default function Login() {
     const result = await loginUser(email, password);
 
     if (result.success && result.user) {
+      const userId = String(result.user._id ?? "");
+      const username =
+        (typeof result.user.name === "string" && result.user.name.trim()) ||
+        (typeof result.user.username === "string" &&
+          result.user.username.trim()) ||
+        "me";
+      if (userId) {
+        await writeSessionSnapshot({ userId, username });
+      }
       setUser(result.user);
       router.refresh();
       router.push("/");

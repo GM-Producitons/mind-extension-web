@@ -1,4 +1,6 @@
 import { getToken, deleteToken } from "firebase/messaging";
+import { FIREBASE_MESSAGING_SCOPE } from "@/features/offline/constants";
+import { releaseRootFirebaseWorker, waitForWorker } from "@/features/offline/service-worker";
 import { getFirebaseMessaging } from "@/lib/firebase/FirebaseClient";
 
 export async function getFCMToken() {
@@ -13,10 +15,12 @@ export async function getFCMToken() {
   }
 
   try {
+    await releaseRootFirebaseWorker();
     const registration = await navigator.serviceWorker.register(
       "/firebase-messaging-sw.js",
+      { scope: FIREBASE_MESSAGING_SCOPE },
     );
-    await navigator.serviceWorker.ready;
+    await waitForWorker(registration);
 
     try {
       await deleteToken(messaging);

@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
+import { OfflineRuntime } from "@/features/offline/offline-runtime";
 
 export default function ClientProviders({
   children,
@@ -10,6 +11,7 @@ export default function ClientProviders({
 }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <OfflineRuntime />
       {children}
       <Toaster />
     </ThemeProvider>

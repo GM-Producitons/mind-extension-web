@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -11,6 +11,7 @@ import {
 import { ConfirmDialog } from "@/features/shared/template/confirm-dialog";
 import { EmptyState } from "@/features/shared/template/empty-state";
 import { PageHeader } from "@/features/shared/template/page-header";
+import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { useQuickCreate } from "@/features/shared/store/quick-create.store";
 import { useMyInstaFeed } from "../hooks/use-myinsta-feed";
@@ -31,10 +32,37 @@ export function MyInstaPage() {
     <TooltipProvider>
       <div className="mx-auto w-full max-w-[470px]">
         <div className="px-4 pt-4">
-          <PageHeader title="MyInsta" size="sm" className="mb-3" />
+          <PageHeader
+            title="MyInsta"
+            size="sm"
+            className="mb-3"
+            trailing={
+              page.pendingCount > 0 ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      aria-label="Sync"
+                      disabled={page.syncing}
+                      onClick={() => void page.syncNow()}
+                    >
+                      <RefreshCw className={cn(page.syncing && "animate-spin")} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Sync</TooltipContent>
+                </Tooltip>
+              ) : undefined
+            }
+          />
         </div>
 
-        {page.isLoading ? (
+        {page.needsSignIn ? (
+          <p className="px-4 text-sm text-muted-foreground">
+            Sign in while online
+          </p>
+        ) : page.isLoading ? (
           <p className="px-4 text-sm text-muted-foreground">Loading</p>
         ) : page.posts.length === 0 ? (
           <EmptyState title="No posts" size="sm" />

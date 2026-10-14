@@ -16,6 +16,7 @@ export interface MyInstaPostMongooseDocument extends mongoose.Document {
   caption: string;
   images: MyInstaImage[];
   liked: boolean;
+  clientId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,11 +43,19 @@ const MyInstaPostSchema = new Schema<MyInstaPostMongooseDocument>(
     caption: { type: String, default: "", trim: true },
     images: { type: [MyInstaImageSchema], required: true },
     liked: { type: Boolean, default: false },
+    clientId: { type: String, trim: true },
   },
   { timestamps: true },
 );
 
 MyInstaPostSchema.index({ userId: 1, createdAt: -1 });
+MyInstaPostSchema.index(
+  { userId: 1, clientId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { clientId: { $type: "string" } },
+  },
+);
 
 if (mongoose.models.MyInstaPost) {
   mongoose.deleteModel("MyInstaPost");
