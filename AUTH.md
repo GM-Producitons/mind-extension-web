@@ -57,7 +57,10 @@ Dead simple auth for 1–3 users. Password → JWT → httpOnly cookie.
    MY_MONGODB_URI=mongodb+srv://...
    MONGODB_DB=mind-extension
    JWT_SECRET=some-random-string-at-least-32-chars
+   ACTIVITY_API_KEY=long-random-string
    ```
+
+   `/api/activity/*` is outside cookie auth. Those routes require an `x-api-key` header equal to `ACTIVITY_API_KEY`.
 
 2. Create your user (one-time): call `createOneUser("your-password")` or hit the sign-up flow once.
 

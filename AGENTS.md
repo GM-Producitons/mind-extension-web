@@ -83,6 +83,14 @@ When adding:
 - When a navigation cannot load offline, the service worker serves `public/offline.html`. That page lists only offline-capable features. Add a link there when another feature works offline. Home (`/` and `/dashboard`) uses that page while offline.
 - The mobile + → Post action stores `me-quick-create` until the create dialog closes, so the dialog still opens after the route change.
 
+## Activity
+
+- Only WORKING time is stored, as sessions (`startedAt`, `endedAt` null while open, `lastNudgedAt`). FREE is derived. At most one open session, enforced by a partial unique index on `open: true`.
+- "Today" is the Africa/Cairo calendar day. Time math stays in `src/features/activity/lib/activity-time.ts`.
+- MacroDroid calls `GET /api/activity/status`, `POST /api/activity/toggle`, and `GET /api/activity/nudge`. Plain text, `Cache-Control: no-store`, header `x-api-key` must match `ACTIVITY_API_KEY`.
+- A nudge is `yes` only while a session is open and an hour has passed since it started or since the last nudge. Claiming it is one atomic update.
+- Toggle has a TODO where Ably publish will go. Do not add a `kind` field or multi-user support until that feature needs them.
+
 ## Client state
 
 - **Zustand** for client state shared across components. Not for a single widget's local open/closed or input state.
