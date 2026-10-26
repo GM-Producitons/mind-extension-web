@@ -90,6 +90,7 @@ When adding:
 - MacroDroid calls `GET /api/activity/status`, `POST /api/activity/toggle`, and `GET /api/activity/nudge`. Plain text, `Cache-Control: no-store`, header `x-api-key` must match `ACTIVITY_API_KEY`.
 - A nudge is `yes` only while a session is open and an hour has passed since it started or since the last nudge. Claiming it is one atomic update.
 - Toggle has a TODO where Ably publish will go. Do not add a `kind` field or multi-user support until that feature needs them.
+- The dashboard work chart replaces the app list. It shows average work per day, the last 7 Cairo days, and the last 4 weeks.
 
 ## Client state
 

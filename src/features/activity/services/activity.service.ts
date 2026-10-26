@@ -1,3 +1,4 @@
+import { addCairoDays, buildWorkChart } from "../lib/activity-chart";
 import {
   cairoDayStart,
   formatStatusLine,
@@ -39,4 +40,10 @@ export async function toggleActivity(now = new Date()): Promise<string> {
 export async function takeActivityNudge(now = new Date()): Promise<"yes" | "no"> {
   const claimed = await claimNudge(now);
   return claimed ? "yes" : "no";
+}
+
+export async function getWorkChart(now = new Date()) {
+  const rangeStart = addCairoDays(cairoDayStart(now), -27);
+  const sessions = await findSessionsOverlapping(rangeStart, now);
+  return { success: true as const, data: buildWorkChart(sessions, now) };
 }

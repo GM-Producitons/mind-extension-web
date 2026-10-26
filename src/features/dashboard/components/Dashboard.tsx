@@ -1,93 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { Brain, Zap, Eye, Plus, Wrench, MessageCircle, Layers, Instagram } from "lucide-react";
-import { ReactNode, useEffect } from "react";
+import { Plus } from "lucide-react";
+import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import BackgroundProvider from "@/components/BackgroundProvider";
+import { WorkChartPanel } from "@/features/activity/components/WorkChart";
 import GenTimeline from "@/features/timeline/components/GenTimeline";
 import type { TimelineEvent } from "@/features/timeline/models/timeline_event";
 import { FIREBASE_MESSAGING_SCOPE } from "@/features/offline/constants";
 import { releaseRootFirebaseWorker } from "@/features/offline/service-worker";
-
-interface SubApp {
-  id: string;
-  title: string;
-  description: string;
-  href: string;
-  icon: ReactNode;
-}
-
-const subAppsData: SubApp[] = [
-  {
-    id: "htbasas",
-    title: "HTBASAS",
-    description: "Manage your todos and things to review in one place",
-    href: "/htbasas",
-    icon: <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
-  },
-  {
-    id: "avgbus",
-    title: "Average Bus",
-    description: "Track and analyze bus average metrics",
-    href: "/avgbus",
-    icon: <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
-  },
-  {
-    id: "vision",
-    title: "Vision",
-    description: "Your vision and long-term goals",
-    href: "/vision",
-    icon: <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
-  },
-  {
-    id: "test",
-    title: "Test App",
-    description: "This is a test app for development purposes",
-    href: "/test",
-    icon: <Wrench className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
-  },
-  {
-    id: "Chat",
-    title: "Chat",
-    description: "Chat with other users ;)",
-    href: "/chat",
-    icon: <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
-  },
-  {
-    id: "flashcards",
-    title: "Flashcards",
-    description: "Practice clues grouped into clusters",
-    href: "/flashcards",
-    icon: <Layers className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
-  },
-  {
-    id: "myinsta",
-    title: "MyInsta",
-    description: "Private photo feed",
-    href: "/myinsta",
-    icon: <Instagram className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />,
-  },
-];
-
-function renderAppCard(app: SubApp): ReactNode {
-  return (
-    <Link key={app.id} href={app.href}>
-      <div className="h-full p-4 sm:p-6 bg-card rounded-lg border border-border hover:bg-secondary hover:border-primary transition-all cursor-pointer shadow-sm hover:shadow-md">
-        <div className="flex items-start justify-between mb-4">
-          <div className="p-2 sm:p-3 bg-primary/10 rounded-lg">{app.icon}</div>
-        </div>
-        <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">
-          {app.title}
-        </h2>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          {app.description}
-        </p>
-      </div>
-    </Link>
-  );
-}
 
 // Desktop layout - Original design (Row 1: 3-col grid, Row 2: 3-col grid)
 function DesktopCardLayout() {
@@ -268,13 +190,7 @@ export default function Dashboard({
         ) : (
           <GenTimeline events={timelineEvents} onEventClick={onEventClick} />
         )}
-        {/* Apps Grid */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-6">Applications</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {subAppsData.map((app) => renderAppCard(app))}
-          </div>
-        </div>
+        <WorkChartPanel />
       </div>
     </BackgroundProvider>
   );
