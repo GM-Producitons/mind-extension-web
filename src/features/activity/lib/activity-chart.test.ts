@@ -9,11 +9,15 @@ function at(iso: string): Date {
   return new Date(iso);
 }
 
-function span(startedAt: string, endedAt: string | null): ActivitySessionSpan {
+function span(
+  startedAt: string,
+  endedAt: string | null,
+  state: ActivitySessionSpan["state"] = "work",
+): ActivitySessionSpan {
   return {
     startedAt: at(startedAt),
     endedAt: endedAt ? at(endedAt) : null,
-    lastNudgedAt: null,
+    state,
   };
 }
 
@@ -43,7 +47,7 @@ describe("buildWorkChart", () => {
       "Wed",
       "Thu",
     ]);
-    expect(chart.week.bars.every((bar) => bar.workMs === 0)).toBe(true);
+    expect(chart.week.bars.every((bar) => bar.totalMs === 0)).toBe(true);
     expect(chart.week.averageMs).toBe(0);
     expect(chart.month.bars).toHaveLength(4);
     expect(chart.month.bars.map((bar) => bar.label)).toEqual([
@@ -61,7 +65,7 @@ describe("buildWorkChart", () => {
       now,
     );
 
-    expect(chart.week.bars.map((bar) => bar.workMs)).toEqual([
+    expect(chart.week.bars.map((bar) => bar.totalMs)).toEqual([
       0,
       0,
       0,
@@ -70,8 +74,9 @@ describe("buildWorkChart", () => {
       0,
       2 * HOUR,
     ]);
+    expect(chart.week.bars[6].byStateMs.work).toBe(2 * HOUR);
     expect(chart.week.averageMs).toBe(Math.floor((2 * HOUR) / 7));
-    expect(chart.month.bars[3].workMs).toBe(2 * HOUR);
+    expect(chart.month.bars[3].totalMs).toBe(2 * HOUR);
     expect(chart.month.averageMs).toBe(Math.floor((2 * HOUR) / 28));
   });
 
@@ -81,9 +86,23 @@ describe("buildWorkChart", () => {
       now,
     );
 
-    expect(chart.week.bars[5].workMs).toBe(2 * HOUR);
-    expect(chart.week.bars[6].workMs).toBe(3 * HOUR);
-    expect(chart.month.bars[3].workMs).toBe(5 * HOUR);
+    expect(chart.week.bars[5].totalMs).toBe(2 * HOUR);
+    expect(chart.week.bars[6].totalMs).toBe(3 * HOUR);
+    expect(chart.month.bars[3].totalMs).toBe(5 * HOUR);
+  });
+
+  it("keeps states separate in stacked totals", () => {
+    const chart = buildWorkChart(
+      [
+        span("2026-01-15T06:00:00.000Z", "2026-01-15T07:00:00.000Z", "work"),
+        span("2026-01-15T08:00:00.000Z", "2026-01-15T09:00:00.000Z", "studying"),
+      ],
+      now,
+    );
+
+    expect(chart.week.bars[6].byStateMs.work).toBe(HOUR);
+    expect(chart.week.bars[6].byStateMs.studying).toBe(HOUR);
+    expect(chart.week.bars[6].totalMs).toBe(2 * HOUR);
   });
 
   it("keeps an earlier week out of the last-seven-days view", () => {
@@ -98,8 +117,8 @@ describe("buildWorkChart", () => {
       now,
     );
 
-    expect(chart.week.bars.every((bar) => bar.workMs === 0)).toBe(true);
-    expect(chart.month.bars[0].workMs).toBe(HOUR);
-    expect(chart.month.bars.slice(1).every((bar) => bar.workMs === 0)).toBe(true);
+    expect(chart.week.bars.every((bar) => bar.totalMs === 0)).toBe(true);
+    expect(chart.month.bars[0].totalMs).toBe(HOUR);
+    expect(chart.month.bars.slice(1).every((bar) => bar.totalMs === 0)).toBe(true);
   });
 });

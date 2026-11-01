@@ -1,19 +1,34 @@
-export const CAIRO_TIME_ZONE = "Africa/Cairo";
-export const NUDGE_INTERVAL_MS = 60 * 60 * 1000;
+import {
+  emptyStateTotalsMs,
+  formatCurrentStateHeading,
+  STATUS_TOTAL_LABELS,
+  type ActivityState,
+  type StoredActivityState,
+  STORED_ACTIVITY_STATES,
+} from "./activity-states";
 
-export type ActivityState = "FREE" | "WORKING";
+export const CAIRO_TIME_ZONE = "Africa/Cairo";
 
 export interface ActivitySessionSpan {
   startedAt: Date;
   endedAt: Date | null;
-  lastNudgedAt: Date | null;
+  state: StoredActivityState;
 }
 
 export interface DaySummary {
-  state: ActivityState;
-  stateMs: number;
-  workMs: number;
+  currentState: ActivityState;
+  currentStateMs: number;
+  since: Date;
+  totalsMs: Record<StoredActivityState, number>;
   freeMs: number;
+}
+
+export interface ActivityStatusJson {
+  state: ActivityState;
+  since: string;
+  currentMinutes: number;
+  totals: Partial<Record<StoredActivityState, number>>;
+  freeMinutes: number;
 }
 
 interface CairoParts {
@@ -92,12 +107,13 @@ export function summarizeDay(
   now: Date,
 ): DaySummary {
   const dayStart = cairoDayStart(now);
-  let workMs = 0;
+  const totalsMs = emptyStateTotalsMs();
   let open: ActivitySessionSpan | null = null;
 
   for (const session of sessions) {
     const end = session.endedAt ?? now;
-    workMs += overlapMs(session.startedAt, end, dayStart, now);
+    const sliceMs = overlapMs(session.startedAt, end, dayStart, now);
+    totalsMs[session.state] += sliceMs;
     if (session.endedAt === null) {
       if (!open || session.startedAt.getTime() > open.startedAt.getTime()) {
         open = session;
@@ -106,33 +122,30 @@ export function summarizeDay(
   }
 
   const elapsed = Math.max(0, now.getTime() - dayStart.getTime());
-  const freeMs = Math.max(0, elapsed - workMs);
+  const trackedMs = STORED_ACTIVITY_STATES.reduce(
+    (sum, state) => sum + totalsMs[state],
+    0,
+  );
+  const freeMs = Math.max(0, elapsed - trackedMs);
 
   if (open) {
     return {
-      state: "WORKING",
-      stateMs: Math.max(0, now.getTime() - open.startedAt.getTime()),
-      workMs,
+      currentState: open.state,
+      currentStateMs: Math.max(0, now.getTime() - open.startedAt.getTime()),
+      since: open.startedAt,
+      totalsMs,
       freeMs,
     };
   }
 
   const freeSince = lastEndedAt ?? dayStart;
   return {
-    state: "FREE",
-    stateMs: Math.max(0, now.getTime() - freeSince.getTime()),
-    workMs,
+    currentState: "free",
+    currentStateMs: Math.max(0, now.getTime() - freeSince.getTime()),
+    since: freeSince,
+    totalsMs,
     freeMs,
   };
-}
-
-export function isNudgeDue(
-  session: ActivitySessionSpan | null,
-  now: Date,
-): boolean {
-  if (!session || session.endedAt !== null) return false;
-  const anchor = session.lastNudgedAt ?? session.startedAt;
-  return now.getTime() - anchor.getTime() >= NUDGE_INTERVAL_MS;
 }
 
 export function formatDuration(ms: number): string {
@@ -142,6 +155,46 @@ export function formatDuration(ms: number): string {
   return `${hours}h ${String(minutes).padStart(2, "0")}m`;
 }
 
+export function formatStatusDuration(ms: number): string {
+  const totalMinutes = Math.floor(Math.max(0, ms) / 60_000);
+  if (totalMinutes < 60) return `${totalMinutes}m`;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (minutes === 0) return `${hours}h`;
+  return `${hours}h ${minutes}m`;
+}
+
 export function formatStatusLine(summary: DaySummary): string {
-  return `${summary.state} ${formatDuration(summary.stateMs)} · Today: work ${formatDuration(summary.workMs)} / free ${formatDuration(summary.freeMs)}`;
+  const parts: string[] = [
+    `${formatCurrentStateHeading(summary.currentState)} ${formatStatusDuration(summary.currentStateMs)}`,
+  ];
+
+  for (const state of STORED_ACTIVITY_STATES) {
+    const ms = summary.totalsMs[state];
+    if (ms <= 0) continue;
+    parts.push(`${STATUS_TOTAL_LABELS[state]} ${formatStatusDuration(ms)}`);
+  }
+
+  parts.push(`free ${formatStatusDuration(summary.freeMs)}`);
+  return parts.join(" · ");
+}
+
+export function toStatusJson(summary: DaySummary): ActivityStatusJson {
+  const totals: Partial<Record<StoredActivityState, number>> = {};
+  for (const state of STORED_ACTIVITY_STATES) {
+    const minutes = Math.floor(summary.totalsMs[state] / 60_000);
+    if (minutes > 0) totals[state] = minutes;
+  }
+
+  return {
+    state: summary.currentState,
+    since: summary.since.toISOString(),
+    currentMinutes: Math.floor(summary.currentStateMs / 60_000),
+    totals,
+    freeMinutes: Math.floor(summary.freeMs / 60_000),
+  };
+}
+
+export function msToMinutes(ms: number): number {
+  return Math.floor(Math.max(0, ms) / 60_000);
 }
