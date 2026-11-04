@@ -3,7 +3,14 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, Plus } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Drawer,
   DrawerContent,
@@ -46,6 +53,7 @@ interface MobileDockProps {
 export function MobileDock({ apps, onApp }: MobileDockProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const reduceMotion = useReducedMotion();
   const [menuOpen, setMenuOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
   const [personOpen, setPersonOpen] = useState(false);
@@ -63,30 +71,53 @@ export function MobileDock({ apps, onApp }: MobileDockProps) {
   };
 
   return (
-    <>
+    <TooltipProvider>
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4">
-        <div className="pointer-events-auto flex h-14 w-full max-w-sm overflow-hidden rounded-full border border-border/70 bg-background/55 shadow-lg backdrop-blur-2xl">
-          <div className="flex flex-1 items-center justify-center px-3 text-sm font-medium">
-            <span className="truncate">{pageLabel(pathname)}</span>
+        <div className="pointer-events-auto grid h-14 w-full max-w-sm grid-cols-3 items-center rounded-full border border-border/70 bg-background/55 shadow-lg backdrop-blur-2xl">
+          <div className="min-w-0 px-3 text-center text-sm font-medium">
+            <span className="block truncate">{pageLabel(pathname)}</span>
           </div>
-          <div className="my-3 w-px bg-border/80" />
-          <button
-            type="button"
-            className="flex flex-1 items-center justify-center text-foreground"
-            aria-label="Create"
-            onClick={() => setQuickOpen(true)}
-          >
-            <Plus className="size-6" />
-          </button>
-          <div className="my-3 w-px bg-border/80" />
-          <button
-            type="button"
-            className="flex flex-1 items-center justify-center text-foreground"
-            aria-label="Menu"
-            onClick={() => setMenuOpen(true)}
-          >
-            <Menu className="size-5" />
-          </button>
+          <div className="flex items-center justify-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="icon"
+                  className="relative size-12 rounded-full ring-4 ring-background"
+                  style={{
+                    boxShadow:
+                      "0 8px 22px color-mix(in oklch, var(--primary) 45%, transparent)",
+                  }}
+                  aria-label="Create"
+                  onClick={() => setQuickOpen(true)}
+                >
+                  {reduceMotion ? null : (
+                    <motion.span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 rounded-full bg-primary"
+                      animate={{ scale: [1, 1.28, 1], opacity: [0.4, 0, 0.4] }}
+                      transition={{ duration: 2.6, repeat: Infinity, ease: "easeOut" }}
+                    />
+                  )}
+                  <Plus className="relative size-6" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">Create</TooltipContent>
+            </Tooltip>
+          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className="flex h-full w-full items-center justify-center text-foreground"
+                aria-label="Menu"
+                onClick={() => setMenuOpen(true)}
+              >
+                <Menu className="size-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top">Menu</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
@@ -165,6 +196,6 @@ export function MobileDock({ apps, onApp }: MobileDockProps) {
 
       <CreatePersonDrawer open={personOpen} onOpenChange={setPersonOpen} />
       <PersonEntryDrawer open={entryOpen} onOpenChange={setEntryOpen} />
-    </>
+    </TooltipProvider>
   );
 }
