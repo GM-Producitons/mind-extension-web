@@ -6,14 +6,12 @@ import { Button } from "@/components/ui/button";
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
 import {
   formatCurrentStateHeading,
   STATUS_TOTAL_LABELS,
   STORED_ACTIVITY_STATES,
-  type StoredActivityState,
 } from "../lib/activity-states";
 import type { WorkBar, WorkChart } from "../lib/activity-chart";
 import { formatDuration, formatStatusDuration } from "../lib/activity-time";
@@ -43,12 +41,68 @@ function barRow(bar: WorkBar) {
   return row;
 }
 
+function msInRow(row: Record<string, string | number> | undefined, key: string) {
+  const ms = row?.[key];
+  return typeof ms === "number" ? ms : 0;
+}
+
+function ActivityTooltip({
+  active,
+  label,
+  payload,
+}: {
+  active?: boolean;
+  label?: string | number;
+  payload?: ReadonlyArray<{ payload?: Record<string, string | number> }>;
+}) {
+  if (!active || !payload?.length) return null;
+
+  const row = payload[0]?.payload;
+  const lines = STORED_ACTIVITY_STATES.flatMap((state) => {
+    const ms = msInRow(row, `${state}Ms`);
+    if (ms <= 0) return [];
+    return [{ state, ms }];
+  });
+  const totalMs = msInRow(row, "totalMs");
+
+  return (
+    <div className="grid min-w-40 gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+      <p className="font-medium">{label}</p>
+      <div className="grid gap-1">
+        {lines.map(({ state, ms }) => (
+          <div key={state} className="flex items-center justify-between gap-4">
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <span
+                className="size-2 shrink-0 rounded-[2px]"
+                style={{ backgroundColor: `var(--color-${state})` }}
+              />
+              {STATUS_TOTAL_LABELS[state]}
+            </span>
+            <span className="font-mono font-medium tabular-nums">
+              {formatDuration(ms)}
+            </span>
+          </div>
+        ))}
+        <div className="flex items-center justify-between gap-4 border-t border-border pt-1">
+          <span className="text-muted-foreground">total</span>
+          <span className="font-mono font-medium tabular-nums">
+            {formatDuration(totalMs)}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function WorkBars({ data, view }: { data: WorkChart; view: ChartView }) {
   const series = view === "week" ? data.week : data.month;
   const chartData = series.bars.map((bar) => barRow(bar));
 
   return (
-    <ChartContainer config={chartConfig} className="aspect-auto h-56 w-full px-2 pb-2">
+    <ChartContainer
+      config={chartConfig}
+      className="aspect-auto h-56 w-full px-2 pb-2 [-webkit-tap-highlight-color:transparent] [&_*:focus:not(:focus-visible)]:outline-none"
+    >
       <BarChart data={chartData} margin={{ left: 0, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} />
         <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
@@ -59,30 +113,14 @@ function WorkBars({ data, view }: { data: WorkChart; view: ChartView }) {
           tickFormatter={(value: number) => `${value}`}
         />
         <ChartTooltip
-          content={
-            <ChartTooltipContent
-              formatter={(value, name, item) => {
-                const state = String(name) as StoredActivityState;
-                const msKey = `${state}Ms`;
-                const payload = item.payload as Record<string, number>;
-                const ms =
-                  typeof payload[msKey] === "number"
-                    ? payload[msKey]
-                    : Number(value) * 3_600_000;
-                if (ms <= 0) return null;
-                return (
-                  <span className="font-mono font-medium tabular-nums">
-                    {formatDuration(ms)}
-                  </span>
-                );
-              }}
-              labelFormatter={(_label, payload) => {
-                const row = payload?.[0]?.payload as Record<string, number> | undefined;
-                const totalMs = row?.totalMs ?? 0;
-                return totalMs > 0 ? formatDuration(totalMs) : "";
-              }}
+          cursor={false}
+          content={(props) => (
+            <ActivityTooltip
+              active={props.active}
+              label={props.label}
+              payload={props.payload}
             />
-          }
+          )}
         />
         {STORED_ACTIVITY_STATES.map((state) => (
           <Bar
@@ -92,6 +130,7 @@ function WorkBars({ data, view }: { data: WorkChart; view: ChartView }) {
             fill={`var(--color-${state})`}
             radius={0}
             maxBarSize={48}
+            activeBar={false}
           />
         ))}
       </BarChart>
