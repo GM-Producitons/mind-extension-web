@@ -2,10 +2,9 @@ import {
   emptyStateTotalsMs,
   formatCurrentStateHeading,
   STATUS_TOTAL_LABELS,
-  trackedTotalMs,
+  STORED_ACTIVITY_STATES,
   type ActivityState,
   type StoredActivityState,
-  STORED_ACTIVITY_STATES,
 } from "./activity-states";
 
 export const CAIRO_TIME_ZONE = "Africa/Cairo";
@@ -123,8 +122,11 @@ export function summarizeDay(
   }
 
   const elapsed = Math.max(0, now.getTime() - dayStart.getTime());
-  const trackedMs = trackedTotalMs(totalsMs);
-  const freeMs = Math.max(0, elapsed - trackedMs);
+  const sessionMs = STORED_ACTIVITY_STATES.reduce(
+    (sum, state) => sum + totalsMs[state],
+    0,
+  );
+  const freeMs = Math.max(0, elapsed - sessionMs);
 
   if (open) {
     return {

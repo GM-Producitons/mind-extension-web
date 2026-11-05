@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Brain, Clock3, Dumbbell, Moon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   ChartContainer,
@@ -10,9 +12,11 @@ import {
 } from "@/components/ui/chart";
 import {
   ACTIVITY_ROLLUP_LABELS,
+  CHART_BAR_STATES,
   formatCurrentStateHeading,
   STATUS_TOTAL_LABELS,
   STORED_ACTIVITY_STATES,
+  type ActivityRollupTotals,
 } from "../lib/activity-states";
 import type { WorkBar, WorkChart } from "../lib/activity-chart";
 import { formatDuration, formatStatusDuration } from "../lib/activity-time";
@@ -30,6 +34,17 @@ const chartConfig = STORED_ACTIVITY_STATES.reduce((config, state, index) => {
 
 type ChartView = "week" | "month";
 
+const AVERAGE_ROWS: {
+  key: keyof ActivityRollupTotals;
+  label: string;
+  icon: LucideIcon;
+}[] = [
+  { key: "focusMs", label: ACTIVITY_ROLLUP_LABELS.focus, icon: Brain },
+  { key: "trainingMs", label: ACTIVITY_ROLLUP_LABELS.training, icon: Dumbbell },
+  { key: "trackedMs", label: ACTIVITY_ROLLUP_LABELS.tracked, icon: Clock3 },
+  { key: "sleepMs", label: ACTIVITY_ROLLUP_LABELS.sleep, icon: Moon },
+];
+
 function barRow(bar: WorkBar) {
   const row: Record<string, string | number> = {
     label: bar.label,
@@ -39,8 +54,10 @@ function barRow(bar: WorkBar) {
     sleepTotalMs: bar.totals.sleepMs,
   };
   for (const state of STORED_ACTIVITY_STATES) {
-    row[state] = bar.byStateMs[state] / 3_600_000;
     row[`${state}Ms`] = bar.byStateMs[state];
+  }
+  for (const state of CHART_BAR_STATES) {
+    row[state] = bar.byStateMs[state] / 3_600_000;
   }
   return row;
 }
@@ -134,7 +151,7 @@ function WorkBars({ data, view }: { data: WorkChart; view: ChartView }) {
             />
           )}
         />
-        {STORED_ACTIVITY_STATES.map((state) => (
+        {CHART_BAR_STATES.map((state) => (
           <Bar
             key={state}
             dataKey={state}
@@ -171,20 +188,14 @@ export function WorkChartPanel() {
           </p>
           {!isLoading && !error && averages ? (
             <div className="mt-0.5 grid gap-0.5 font-mono text-xs tabular-nums text-muted-foreground">
-              <p>
-                {ACTIVITY_ROLLUP_LABELS.focus} {formatDuration(averages.focusMs)} / day
-              </p>
-              <p>
-                {ACTIVITY_ROLLUP_LABELS.training}{" "}
-                {formatDuration(averages.trainingMs)} / day
-              </p>
-              <p>
-                {ACTIVITY_ROLLUP_LABELS.tracked}{" "}
-                {formatDuration(averages.trackedMs)} / day
-              </p>
-              <p>
-                {ACTIVITY_ROLLUP_LABELS.sleep} {formatDuration(averages.sleepMs)} / day
-              </p>
+              {AVERAGE_ROWS.map(({ key, label, icon: Icon }) => (
+                <p key={key} className="flex items-center gap-1.5">
+                  <Icon className="size-3 shrink-0" aria-hidden />
+                  <span>
+                    {label} {formatDuration(averages[key])} / day
+                  </span>
+                </p>
+              ))}
             </div>
           ) : null}
         </div>

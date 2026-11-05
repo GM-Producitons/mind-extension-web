@@ -85,6 +85,21 @@ describe("summarizeDay", () => {
     );
   });
 
+  it("does not count sleep toward free time", () => {
+    const now = at("2026-01-15T12:00:00.000Z");
+    const summary = summarizeDay(
+      [span("2026-01-15T02:00:00.000Z", "2026-01-15T10:00:00.000Z", "sleep")],
+      at("2026-01-15T10:00:00.000Z"),
+      now,
+    );
+
+    expect(summary.totalsMs.sleep).toBe(8 * HOUR);
+    expect(summary.freeMs).toBe(6 * HOUR);
+    expect(formatStatusLine(summary)).toBe(
+      "FREE 2h · sleep 8h · free 6h",
+    );
+  });
+
   it("sums several sessions by state", () => {
     const now = at("2026-01-15T12:00:00.000Z");
     const summary = summarizeDay(

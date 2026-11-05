@@ -22,6 +22,9 @@ export const STORED_ACTIVITY_STATES: StoredActivityState[] =
 export const TRACKED_ACTIVITY_STATES: StoredActivityState[] =
   STORED_ACTIVITY_STATES.filter((state) => state !== "sleep");
 
+/** States drawn in the stacked activity chart (sleep excluded). */
+export const CHART_BAR_STATES: StoredActivityState[] = TRACKED_ACTIVITY_STATES;
+
 /** Work, study, and personal projects rolled into the focus total. */
 export const FOCUS_ACTIVITY_STATES = [
   "work",
