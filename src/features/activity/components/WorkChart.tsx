@@ -17,7 +17,7 @@ import type { WorkBar, WorkChart } from "../lib/activity-chart";
 import { formatDuration, formatStatusDuration } from "../lib/activity-time";
 import { useWorkChart } from "../hooks/use-work-chart";
 
-const GREY_OPACITIES = [0.28, 0.34, 0.4, 0.46, 0.52, 0.58, 0.64, 0.7] as const;
+const GREY_OPACITIES = [0.28, 0.34, 0.4, 0.46, 0.52, 0.58, 0.64, 0.7, 0.76] as const;
 
 const chartConfig = STORED_ACTIVITY_STATES.reduce((config, state, index) => {
   config[state] = {

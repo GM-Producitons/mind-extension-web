@@ -7,6 +7,7 @@ export const ACTIVITY_STATES = [
   "mashawer",
   "studying",
   "college_training",
+  "sleep",
   "free",
 ] as const;
 
@@ -33,6 +34,7 @@ export const STATUS_TOTAL_LABELS: Record<StoredActivityState, string> = {
   mashawer: "mashawer",
   studying: "study",
   college_training: "training",
+  sleep: "sleep",
 };
 
 export function formatCurrentStateHeading(state: ActivityState): string {
@@ -50,5 +52,6 @@ export function emptyStateTotalsMs(): Record<StoredActivityState, number> {
     mashawer: 0,
     studying: 0,
     college_training: 0,
+    sleep: 0,
   };
 }
