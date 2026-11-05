@@ -28,6 +28,10 @@ async function ready() {
         { state: { $exists: false } },
         { $set: { state: "work" } },
       );
+      await ActivitySessionModel.collection.updateMany(
+        { state: "college_training" },
+        { $set: { state: "training" } },
+      );
     })
     .catch((error: unknown) => {
       indexesReady = null;

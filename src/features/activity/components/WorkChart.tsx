@@ -9,6 +9,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import {
+  ACTIVITY_ROLLUP_LABELS,
   formatCurrentStateHeading,
   STATUS_TOTAL_LABELS,
   STORED_ACTIVITY_STATES,
@@ -32,7 +33,10 @@ type ChartView = "week" | "month";
 function barRow(bar: WorkBar) {
   const row: Record<string, string | number> = {
     label: bar.label,
-    totalMs: bar.totalMs,
+    focusTotalMs: bar.totals.focusMs,
+    trainingTotalMs: bar.totals.trainingMs,
+    trackedTotalMs: bar.totals.trackedMs,
+    sleepTotalMs: bar.totals.sleepMs,
   };
   for (const state of STORED_ACTIVITY_STATES) {
     row[state] = bar.byStateMs[state] / 3_600_000;
@@ -63,7 +67,11 @@ function ActivityTooltip({
     if (ms <= 0) return [];
     return [{ state, ms }];
   });
-  const totalMs = msInRow(row, "totalMs");
+  const rollupRows = [
+    { key: "focusTotalMs", label: ACTIVITY_ROLLUP_LABELS.focus },
+    { key: "trainingTotalMs", label: ACTIVITY_ROLLUP_LABELS.training },
+    { key: "trackedTotalMs", label: ACTIVITY_ROLLUP_LABELS.tracked },
+  ] as const;
 
   return (
     <div className="grid min-w-40 gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
@@ -83,11 +91,15 @@ function ActivityTooltip({
             </span>
           </div>
         ))}
-        <div className="flex items-center justify-between gap-4 border-t border-border pt-1">
-          <span className="text-muted-foreground">total</span>
-          <span className="font-mono font-medium tabular-nums">
-            {formatDuration(totalMs)}
-          </span>
+        <div className="grid gap-1 border-t border-border pt-1">
+          {rollupRows.map(({ key, label: rollupLabel }) => (
+            <div key={key} className="flex items-center justify-between gap-4">
+              <span className="text-muted-foreground">{rollupLabel}</span>
+              <span className="font-mono font-medium tabular-nums">
+                {formatDuration(msInRow(row, key))}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -141,8 +153,8 @@ function WorkBars({ data, view }: { data: WorkChart; view: ChartView }) {
 export function WorkChartPanel() {
   const { data, status, isLoading, error } = useWorkChart();
   const [view, setView] = useState<ChartView>("week");
-  const averageMs =
-    data == null ? 0 : view === "week" ? data.week.averageMs : data.month.averageMs;
+  const averages =
+    data == null ? null : view === "week" ? data.week.averages : data.month.averages;
 
   const currentLine =
     status == null
@@ -157,10 +169,23 @@ export function WorkChartPanel() {
           <p className="font-mono text-sm tabular-nums text-muted-foreground">
             {isLoading ? "…" : error ? error : currentLine}
           </p>
-          {!isLoading && !error ? (
-            <p className="font-mono text-xs tabular-nums text-muted-foreground">
-              {formatDuration(averageMs)} / day
-            </p>
+          {!isLoading && !error && averages ? (
+            <div className="mt-0.5 grid gap-0.5 font-mono text-xs tabular-nums text-muted-foreground">
+              <p>
+                {ACTIVITY_ROLLUP_LABELS.focus} {formatDuration(averages.focusMs)} / day
+              </p>
+              <p>
+                {ACTIVITY_ROLLUP_LABELS.training}{" "}
+                {formatDuration(averages.trainingMs)} / day
+              </p>
+              <p>
+                {ACTIVITY_ROLLUP_LABELS.tracked}{" "}
+                {formatDuration(averages.trackedMs)} / day
+              </p>
+              <p>
+                {ACTIVITY_ROLLUP_LABELS.sleep} {formatDuration(averages.sleepMs)} / day
+              </p>
+            </div>
           ) : null}
         </div>
         <div className="flex shrink-0 gap-1">

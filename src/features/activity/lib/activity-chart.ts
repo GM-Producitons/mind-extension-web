@@ -1,6 +1,8 @@
 import {
   emptyStateTotalsMs,
+  rollupTotals,
   STORED_ACTIVITY_STATES,
+  type ActivityRollupTotals,
   type StoredActivityState,
 } from "./activity-states";
 import {
@@ -15,12 +17,12 @@ const WEEK_DAYS = 7;
 
 export interface WorkBar {
   label: string;
-  totalMs: number;
   byStateMs: Record<StoredActivityState, number>;
+  totals: ActivityRollupTotals;
 }
 
 export interface WorkChartSeries {
-  averageMs: number;
+  averages: ActivityRollupTotals;
   bars: WorkBar[];
 }
 
@@ -64,10 +66,6 @@ function trackedBetween(
   return byStateMs;
 }
 
-function totalMs(byStateMs: Record<StoredActivityState, number>): number {
-  return STORED_ACTIVITY_STATES.reduce((sum, state) => sum + byStateMs[state], 0);
-}
-
 function dayBuckets(
   sessions: ActivitySessionSpan[],
   now: Date,
@@ -93,14 +91,31 @@ function toBar(day: DayBucket, label: string): WorkBar {
   return {
     label,
     byStateMs: day.byStateMs,
-    totalMs: totalMs(day.byStateMs),
+    totals: rollupTotals(day.byStateMs),
+  };
+}
+
+function averageRollups(bars: WorkBar[], dayCount: number): ActivityRollupTotals {
+  const sum = bars.reduce(
+    (acc, bar) => ({
+      focusMs: acc.focusMs + bar.totals.focusMs,
+      trainingMs: acc.trainingMs + bar.totals.trainingMs,
+      trackedMs: acc.trackedMs + bar.totals.trackedMs,
+      sleepMs: acc.sleepMs + bar.totals.sleepMs,
+    }),
+    { focusMs: 0, trainingMs: 0, trackedMs: 0, sleepMs: 0 },
+  );
+  return {
+    focusMs: Math.floor(sum.focusMs / dayCount),
+    trainingMs: Math.floor(sum.trainingMs / dayCount),
+    trackedMs: Math.floor(sum.trackedMs / dayCount),
+    sleepMs: Math.floor(sum.sleepMs / dayCount),
   };
 }
 
 function series(bars: WorkBar[], dayCount: number): WorkChartSeries {
-  const total = bars.reduce((sum, bar) => sum + bar.totalMs, 0);
   return {
-    averageMs: Math.floor(total / dayCount),
+    averages: averageRollups(bars, dayCount),
     bars,
   };
 }

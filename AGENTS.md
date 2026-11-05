@@ -85,12 +85,12 @@ When adding:
 
 ## Activity
 
-- Sessions store `startedAt`, `endedAt` (null while open), and `state` (`work`, `personal_projects`, `praying`, `eating`, `with_friends`, `mashawer`, `studying`, `college_training`, `sleep`). `free` is not stored; it means no open session. Free time today is elapsed Cairo time minus time in sessions.
+- Sessions store `startedAt`, `endedAt` (null while open), and `state` (`work`, `personal_projects`, `praying`, `eating`, `with_friends`, `mashawer`, `studying`, `training`, `sleep`). `free` is not stored; it means no open session. Free time today is elapsed Cairo time minus tracked time (sleep does not count toward tracked).
 - At most one open session, enforced by a partial unique index on `open: true`.
 - "Today" is the Africa/Cairo calendar day. Time math stays in `src/features/activity/lib/activity-time.ts`.
 - MacroDroid calls `GET /api/activity/status` and `POST /api/activity/toggle` with body `{ "state": "<state>" }`. Plain text by default; `?format=json` on status. `Cache-Control: no-store`, header `x-api-key` must match `ACTIVITY_API_KEY`.
 - Toggle has a TODO where Ably publish will go. Do not add multi-user support until that feature needs it.
-- The dashboard work chart replaces the app list. It shows average tracked time per day, the last 7 Cairo days, and the last 4 weeks, stacked by state.
+- The dashboard work chart replaces the app list. It shows average tracked time per day, the last 7 Cairo days, and the last 4 weeks, stacked by state. Rollups: **focus** (work + study + personal), **training**, **tracked** (all stored states except sleep), and a separate **sleep** average. Day popovers show the same three rollups (focus, training, tracked).
 
 ## Client state
 

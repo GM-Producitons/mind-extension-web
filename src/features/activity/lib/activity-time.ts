@@ -2,6 +2,7 @@ import {
   emptyStateTotalsMs,
   formatCurrentStateHeading,
   STATUS_TOTAL_LABELS,
+  trackedTotalMs,
   type ActivityState,
   type StoredActivityState,
   STORED_ACTIVITY_STATES,
@@ -122,10 +123,7 @@ export function summarizeDay(
   }
 
   const elapsed = Math.max(0, now.getTime() - dayStart.getTime());
-  const trackedMs = STORED_ACTIVITY_STATES.reduce(
-    (sum, state) => sum + totalsMs[state],
-    0,
-  );
+  const trackedMs = trackedTotalMs(totalsMs);
   const freeMs = Math.max(0, elapsed - trackedMs);
 
   if (open) {

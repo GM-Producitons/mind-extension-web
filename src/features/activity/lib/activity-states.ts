@@ -6,7 +6,7 @@ export const ACTIVITY_STATES = [
   "with_friends",
   "mashawer",
   "studying",
-  "college_training",
+  "training",
   "sleep",
   "free",
 ] as const;
@@ -17,6 +17,17 @@ export type StoredActivityState = Exclude<ActivityState, "free">;
 
 export const STORED_ACTIVITY_STATES: StoredActivityState[] =
   ACTIVITY_STATES.filter((state): state is StoredActivityState => state !== "free");
+
+/** Stored states that count toward tracked time (sleep excluded). */
+export const TRACKED_ACTIVITY_STATES: StoredActivityState[] =
+  STORED_ACTIVITY_STATES.filter((state) => state !== "sleep");
+
+/** Work, study, and personal projects rolled into the focus total. */
+export const FOCUS_ACTIVITY_STATES = [
+  "work",
+  "studying",
+  "personal_projects",
+] as const satisfies readonly StoredActivityState[];
 
 const STATE_SET = new Set<string>(ACTIVITY_STATES);
 
@@ -33,9 +44,58 @@ export const STATUS_TOTAL_LABELS: Record<StoredActivityState, string> = {
   with_friends: "friends",
   mashawer: "mashawer",
   studying: "study",
-  college_training: "training",
+  training: "training",
   sleep: "sleep",
 };
+
+export const ACTIVITY_ROLLUP_LABELS = {
+  focus: "focus",
+  training: "training",
+  tracked: "tracked",
+  sleep: "sleep",
+} as const;
+
+export interface ActivityRollupTotals {
+  focusMs: number;
+  trainingMs: number;
+  trackedMs: number;
+  sleepMs: number;
+}
+
+export function focusTotalMs(
+  byStateMs: Record<StoredActivityState, number>,
+): number {
+  return FOCUS_ACTIVITY_STATES.reduce((sum, state) => sum + byStateMs[state], 0);
+}
+
+export function trainingTotalMs(
+  byStateMs: Record<StoredActivityState, number>,
+): number {
+  return byStateMs.training;
+}
+
+export function trackedTotalMs(
+  byStateMs: Record<StoredActivityState, number>,
+): number {
+  return TRACKED_ACTIVITY_STATES.reduce((sum, state) => sum + byStateMs[state], 0);
+}
+
+export function sleepTotalMs(
+  byStateMs: Record<StoredActivityState, number>,
+): number {
+  return byStateMs.sleep;
+}
+
+export function rollupTotals(
+  byStateMs: Record<StoredActivityState, number>,
+): ActivityRollupTotals {
+  return {
+    focusMs: focusTotalMs(byStateMs),
+    trainingMs: trainingTotalMs(byStateMs),
+    trackedMs: trackedTotalMs(byStateMs),
+    sleepMs: sleepTotalMs(byStateMs),
+  };
+}
 
 export function formatCurrentStateHeading(state: ActivityState): string {
   if (state === "free") return "FREE";
@@ -51,7 +111,7 @@ export function emptyStateTotalsMs(): Record<StoredActivityState, number> {
     with_friends: 0,
     mashawer: 0,
     studying: 0,
-    college_training: 0,
+    training: 0,
     sleep: 0,
   };
 }
