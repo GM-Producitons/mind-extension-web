@@ -26,6 +26,7 @@ const LABELS: [string, string][] = [
   ["/schedule", "Schedule"],
   ["/myinsta", "MyInsta"],
   ["/flashcards", "Cards"],
+  ["/pace", "Pace"],
   ["/dashboard", "Home"],
   ["/htbasas", "Tasks"],
   ["/avgbus", "Bus"],
@@ -56,7 +57,7 @@ export function MobileDock({ apps, onApp }: MobileDockProps) {
     return () => document.body.classList.remove("pb-24");
   }, []);
 
-  const openCreate = (kind: "post" | "card", href: string) => {
+  const openCreate = (kind: "post" | "card" | "pace", href: string) => {
     setQuickOpen(false);
     queueQuickCreate(kind);
     router.push(href);
@@ -136,6 +137,14 @@ export function MobileDock({ apps, onApp }: MobileDockProps) {
               onClick={() => openCreate("card", "/flashcards")}
             >
               Flashcard
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-11 justify-start"
+              onClick={() => openCreate("pace", "/pace")}
+            >
+              Pace
             </Button>
             <Button
               type="button"

@@ -3,7 +3,7 @@ import "blobatar/motion.css";
 import "blobatar/gaze.css";
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Silkscreen } from "next/font/google";
 import ClientProviders from "@/components/clientProvider";
 import SettingsButton from "@/components/SettingsButton";
 
@@ -27,6 +27,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const pacePixel = Silkscreen({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-silkscreen",
+});
+
 export const metadata: Metadata = {
   description: "Your personal mind dashboard and productivity system.",
   title: "Mind Extension",
@@ -47,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="w-full h-full" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased w-full h-full`}
+        className={`${geistSans.variable} ${geistMono.variable} ${pacePixel.variable} antialiased w-full h-full`}
       >
         <Script id="viewport-mobile" strategy="beforeInteractive">
           {viewportBootScript}

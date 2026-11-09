@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import {
   Settings,
   LayoutDashboard,
+  Gauge,
   Bus,
   CheckSquare,
   Eye,
@@ -63,6 +64,11 @@ export default function SettingsButton() {
       name: "Dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
       href: "/dashboard",
+    },
+    {
+      name: "Pace",
+      icon: <Gauge className="h-5 w-5" />,
+      href: "/pace",
     },
     {
       name: "Schedule",

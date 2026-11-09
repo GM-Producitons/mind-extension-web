@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 
-type QuickCreate = "post" | "card" | null;
+type QuickCreate = "post" | "card" | "pace" | null;
 type QuickCreateKind = Exclude<QuickCreate, null>;
 
 const STORAGE_KEY = "me-quick-create";

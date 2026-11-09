@@ -92,6 +92,12 @@ When adding:
 - Toggle has a TODO where Ably publish will go. Do not add a `kind` field or multi-user support until that feature needs them.
 - The dashboard work chart replaces the app list. It shows average work per day, the last 7 Cairo days, and the last 4 weeks.
 
+## Pace
+
+- Pace compares done with expected. Done only increases. Falling behind raises expected. Totals are computed, never stored. Amounts are positive integers, one box per unit.
+- Schedule expected is owed on the start date, then again after each full Cairo period: a day, 7 days, or the same day-of-month (clamped to the month’s last day and anchored to the original day). A bar can grow by schedule, events, or both. Note chips are stored on the bar.
+- Entries are append-only. Undo sets `voidedAt`. The UI voids only the latest non-voided `ui` entry on that bar. `PACE_API_KEY` (`x-api-key` on `/api/pace/*` only) can create groups and bars, post entries, and void `grok` entries. Slugs are fixed at create. Children share the group’s unit. Online only.
+
 ## Client state
 
 - **Zustand** for client state shared across components. Not for a single widget's local open/closed or input state.

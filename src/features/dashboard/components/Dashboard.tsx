@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import BackgroundProvider from "@/components/BackgroundProvider";
 import { WorkChartPanel } from "@/features/activity/components/WorkChart";
+import { PaceHome } from "@/features/pace/components/PaceHome";
 import GenTimeline from "@/features/timeline/components/GenTimeline";
 import type { TimelineEvent } from "@/features/timeline/models/timeline_event";
 import { FIREBASE_MESSAGING_SCOPE } from "@/features/offline/constants";
@@ -190,6 +191,7 @@ export default function Dashboard({
         ) : (
           <GenTimeline events={timelineEvents} onEventClick={onEventClick} />
         )}
+        <PaceHome />
         <WorkChartPanel />
       </div>
     </BackgroundProvider>

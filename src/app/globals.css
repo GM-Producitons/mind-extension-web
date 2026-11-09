@@ -43,6 +43,9 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-pace-done: var(--pace-done);
+  --color-pace-frame: var(--pace-frame);
+  --font-pixel: var(--font-silkscreen), ui-monospace, monospace;
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -73,6 +76,10 @@
   --accent: #7c63d8;
   --accent-foreground: #ffffff;
   --destructive: #ef4444;
+  --pace-done: #f5841f;
+  --pace-done-light: #ffb466;
+  --pace-done-dark: #b5560a;
+  --pace-frame: #2d323a;
   --border: #e5e5e5;
   --input: #f5f5f5;
   --ring: #7c63d8;
@@ -107,6 +114,10 @@
   --accent: #8b5cf6;
   --accent-foreground: #ffffff;
   --destructive: #ef4444;
+  --pace-done: #f5841f;
+  --pace-done-light: #ffb466;
+  --pace-done-dark: #b5560a;
+  --pace-frame: #2d323a;
   --border: #3a4557;
   --input: #252d3d;
   --ring: #8b5cf6;
@@ -133,6 +144,22 @@
   body {
     @apply bg-background text-foreground;
     @apply bg-background text-foreground;
+  }
+}
+
+@keyframes pace-blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.pace-box-blink {
+  animation: pace-blink 0.45s steps(2, end) 4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pace-box-blink {
+    animation: none;
   }
 }
 
