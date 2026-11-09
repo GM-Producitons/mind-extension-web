@@ -1,4 +1,11 @@
 import {
+  emptyStateTotalsMs,
+  rollupTotals,
+  STORED_ACTIVITY_STATES,
+  type ActivityRollupTotals,
+  type StoredActivityState,
+} from "./activity-states";
+import {
   cairoDayStart,
   overlapMs,
   type ActivitySessionSpan,
@@ -10,11 +17,12 @@ const WEEK_DAYS = 7;
 
 export interface WorkBar {
   label: string;
-  workMs: number;
+  byStateMs: Record<StoredActivityState, number>;
+  totals: ActivityRollupTotals;
 }
 
 export interface WorkChartSeries {
-  averageMs: number;
+  averages: ActivityRollupTotals;
   bars: WorkBar[];
 }
 
@@ -25,7 +33,7 @@ export interface WorkChart {
 
 interface DayBucket {
   start: Date;
-  workMs: number;
+  byStateMs: Record<StoredActivityState, number>;
 }
 
 export function addCairoDays(dayStart: Date, days: number): Date {
@@ -40,22 +48,22 @@ function cairoLabel(dayStart: Date, options: Intl.DateTimeFormatOptions): string
   }).format(dayStart);
 }
 
-function workBetween(
+function trackedBetween(
   sessions: ActivitySessionSpan[],
   windowStart: Date,
   windowEnd: Date,
   now: Date,
-): number {
-  let total = 0;
+): Record<StoredActivityState, number> {
+  const byStateMs = emptyStateTotalsMs();
   for (const session of sessions) {
-    total += overlapMs(
+    byStateMs[session.state] += overlapMs(
       session.startedAt,
       session.endedAt ?? now,
       windowStart,
       windowEnd,
     );
   }
-  return total;
+  return byStateMs;
 }
 
 function dayBuckets(
@@ -72,17 +80,42 @@ function dayBuckets(
     const end = index === dayCount - 1 ? now : addCairoDays(first, index + 1);
     days.push({
       start,
-      workMs: workBetween(sessions, start, end, now),
+      byStateMs: trackedBetween(sessions, start, end, now),
     });
   }
 
   return days;
 }
 
-function series(bars: WorkBar[], dayCount: number): WorkChartSeries {
-  const total = bars.reduce((sum, bar) => sum + bar.workMs, 0);
+function toBar(day: DayBucket, label: string): WorkBar {
   return {
-    averageMs: Math.floor(total / dayCount),
+    label,
+    byStateMs: day.byStateMs,
+    totals: rollupTotals(day.byStateMs),
+  };
+}
+
+function averageRollups(bars: WorkBar[], dayCount: number): ActivityRollupTotals {
+  const sum = bars.reduce(
+    (acc, bar) => ({
+      focusMs: acc.focusMs + bar.totals.focusMs,
+      trainingMs: acc.trainingMs + bar.totals.trainingMs,
+      trackedMs: acc.trackedMs + bar.totals.trackedMs,
+      sleepMs: acc.sleepMs + bar.totals.sleepMs,
+    }),
+    { focusMs: 0, trainingMs: 0, trackedMs: 0, sleepMs: 0 },
+  );
+  return {
+    focusMs: Math.floor(sum.focusMs / dayCount),
+    trainingMs: Math.floor(sum.trainingMs / dayCount),
+    trackedMs: Math.floor(sum.trackedMs / dayCount),
+    sleepMs: Math.floor(sum.sleepMs / dayCount),
+  };
+}
+
+function series(bars: WorkBar[], dayCount: number): WorkChartSeries {
+  return {
+    averages: averageRollups(bars, dayCount),
     bars,
   };
 }
@@ -96,20 +129,24 @@ export function buildWorkChart(
 
   return {
     week: series(
-      weekDays.map((day) => ({
-        label: cairoLabel(day.start, { weekday: "short" }),
-        workMs: day.workMs,
-      })),
+      weekDays.map((day) =>
+        toBar(day, cairoLabel(day.start, { weekday: "short" })),
+      ),
       WEEK_DAYS,
     ),
     month: series(
       [0, 1, 2, 3].map((week) => {
         const slice = days.slice(week * WEEK_DAYS, week * WEEK_DAYS + WEEK_DAYS);
-        const workMs = slice.reduce((sum, day) => sum + day.workMs, 0);
-        return {
-          label: cairoLabel(slice[0].start, { month: "short", day: "numeric" }),
-          workMs,
-        };
+        const byStateMs = emptyStateTotalsMs();
+        for (const day of slice) {
+          for (const state of STORED_ACTIVITY_STATES) {
+            byStateMs[state] += day.byStateMs[state];
+          }
+        }
+        return toBar(
+          { start: slice[0].start, byStateMs },
+          cairoLabel(slice[0].start, { month: "short", day: "numeric" }),
+        );
       }),
       MONTH_DAYS,
     ),

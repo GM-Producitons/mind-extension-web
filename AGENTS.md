@@ -85,12 +85,12 @@ When adding:
 
 ## Activity
 
-- Only WORKING time is stored, as sessions (`startedAt`, `endedAt` null while open, `lastNudgedAt`). FREE is derived. At most one open session, enforced by a partial unique index on `open: true`.
+- Sessions store `startedAt`, `endedAt` (null while open), and `state` (`work`, `personal_projects`, `praying`, `eating`, `with_friends`, `mashawer`, `studying`, `training`, `sleep`). `free` is not stored; it means no open session. Free time today is elapsed Cairo time minus all logged session time (including sleep).
+- At most one open session, enforced by a partial unique index on `open: true`.
 - "Today" is the Africa/Cairo calendar day. Time math stays in `src/features/activity/lib/activity-time.ts`.
-- MacroDroid calls `GET /api/activity/status`, `POST /api/activity/toggle`, and `GET /api/activity/nudge`. Plain text, `Cache-Control: no-store`, header `x-api-key` must match `ACTIVITY_API_KEY`.
-- A nudge is `yes` only while a session is open and an hour has passed since it started or since the last nudge. Claiming it is one atomic update.
-- Toggle has a TODO where Ably publish will go. Do not add a `kind` field or multi-user support until that feature needs them.
-- The dashboard work chart replaces the app list. It shows average work per day, the last 7 Cairo days, and the last 4 weeks.
+- MacroDroid calls `GET /api/activity/status` and `POST /api/activity/toggle` with body `{ "state": "<state>" }`. Plain text by default; `?format=json` on status. `Cache-Control: no-store`, header `x-api-key` must match `ACTIVITY_API_KEY`.
+- Toggle has a TODO where Ably publish will go. Do not add multi-user support until that feature needs it.
+- The dashboard work chart replaces the app list. It shows average tracked time per day, the last 7 Cairo days, and the last 4 weeks, stacked by state. Rollups: **focus** (work + study + personal), **training**, **tracked** (all stored states except sleep), and a separate **sleep** average. Day popovers show the same three rollups (focus, training, tracked).
 
 ## Pace
 

@@ -24,3 +24,7 @@ export function activityText(body: string, status = 200) {
 export function unauthorizedActivityResponse() {
   return activityText("unauthorized", 401);
 }
+
+export function badRequestActivityResponse(message = "bad request") {
+  return activityText(message, 400);
+}

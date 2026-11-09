@@ -2,41 +2,136 @@
 
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Brain, Clock3, Dumbbell, Moon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import type { WorkChart } from "../lib/activity-chart";
-import { formatDuration } from "../lib/activity-time";
+import {
+  ACTIVITY_ROLLUP_LABELS,
+  CHART_BAR_STATES,
+  formatCurrentStateHeading,
+  STATUS_TOTAL_LABELS,
+  STORED_ACTIVITY_STATES,
+  type ActivityRollupTotals,
+} from "../lib/activity-states";
+import type { WorkBar, WorkChart } from "../lib/activity-chart";
+import { formatDuration, formatStatusDuration } from "../lib/activity-time";
 import { useWorkChart } from "../hooks/use-work-chart";
 
-const chartConfig = {
-  hours: { label: "Work", color: "var(--chart-1)" },
-} satisfies ChartConfig;
+const GREY_OPACITIES = [0.28, 0.34, 0.4, 0.46, 0.52, 0.58, 0.64, 0.7, 0.76] as const;
+
+const chartConfig = STORED_ACTIVITY_STATES.reduce((config, state, index) => {
+  config[state] = {
+    label: STATUS_TOTAL_LABELS[state],
+    color: `color-mix(in oklch, var(--muted-foreground) ${Math.round(GREY_OPACITIES[index] * 100)}%, transparent)`,
+  };
+  return config;
+}, {} as ChartConfig);
 
 type ChartView = "week" | "month";
 
-function workMsFromTooltip(value: unknown, payload: unknown): number {
-  if (payload && typeof payload === "object" && "workMs" in payload) {
-    const workMs = payload.workMs;
-    if (typeof workMs === "number") return workMs;
+const AVERAGE_ROWS: {
+  key: keyof ActivityRollupTotals;
+  label: string;
+  icon: LucideIcon;
+}[] = [
+  { key: "focusMs", label: ACTIVITY_ROLLUP_LABELS.focus, icon: Brain },
+  { key: "trainingMs", label: ACTIVITY_ROLLUP_LABELS.training, icon: Dumbbell },
+  { key: "trackedMs", label: ACTIVITY_ROLLUP_LABELS.tracked, icon: Clock3 },
+  { key: "sleepMs", label: ACTIVITY_ROLLUP_LABELS.sleep, icon: Moon },
+];
+
+function barRow(bar: WorkBar) {
+  const row: Record<string, string | number> = {
+    label: bar.label,
+    focusTotalMs: bar.totals.focusMs,
+    trainingTotalMs: bar.totals.trainingMs,
+    trackedTotalMs: bar.totals.trackedMs,
+    sleepTotalMs: bar.totals.sleepMs,
+  };
+  for (const state of STORED_ACTIVITY_STATES) {
+    row[`${state}Ms`] = bar.byStateMs[state];
   }
-  return Number(value) * 3_600_000;
+  for (const state of CHART_BAR_STATES) {
+    row[state] = bar.byStateMs[state] / 3_600_000;
+  }
+  return row;
+}
+
+function msInRow(row: Record<string, string | number> | undefined, key: string) {
+  const ms = row?.[key];
+  return typeof ms === "number" ? ms : 0;
+}
+
+function ActivityTooltip({
+  active,
+  label,
+  payload,
+}: {
+  active?: boolean;
+  label?: string | number;
+  payload?: ReadonlyArray<{ payload?: Record<string, string | number> }>;
+}) {
+  if (!active || !payload?.length) return null;
+
+  const row = payload[0]?.payload;
+  const lines = STORED_ACTIVITY_STATES.flatMap((state) => {
+    const ms = msInRow(row, `${state}Ms`);
+    if (ms <= 0) return [];
+    return [{ state, ms }];
+  });
+  const rollupRows = [
+    { key: "focusTotalMs", label: ACTIVITY_ROLLUP_LABELS.focus },
+    { key: "trainingTotalMs", label: ACTIVITY_ROLLUP_LABELS.training },
+    { key: "trackedTotalMs", label: ACTIVITY_ROLLUP_LABELS.tracked },
+  ] as const;
+
+  return (
+    <div className="grid min-w-40 gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+      <p className="font-medium">{label}</p>
+      <div className="grid gap-1">
+        {lines.map(({ state, ms }) => (
+          <div key={state} className="flex items-center justify-between gap-4">
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <span
+                className="size-2 shrink-0 rounded-[2px]"
+                style={{ backgroundColor: `var(--color-${state})` }}
+              />
+              {STATUS_TOTAL_LABELS[state]}
+            </span>
+            <span className="font-mono font-medium tabular-nums">
+              {formatDuration(ms)}
+            </span>
+          </div>
+        ))}
+        <div className="grid gap-1 border-t border-border pt-1">
+          {rollupRows.map(({ key, label: rollupLabel }) => (
+            <div key={key} className="flex items-center justify-between gap-4">
+              <span className="text-muted-foreground">{rollupLabel}</span>
+              <span className="font-mono font-medium tabular-nums">
+                {formatDuration(msInRow(row, key))}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function WorkBars({ data, view }: { data: WorkChart; view: ChartView }) {
   const series = view === "week" ? data.week : data.month;
-  const chartData = series.bars.map((bar) => ({
-    label: bar.label,
-    hours: bar.workMs / 3_600_000,
-    workMs: bar.workMs,
-  }));
+  const chartData = series.bars.map((bar) => barRow(bar));
 
   return (
-    <ChartContainer config={chartConfig} className="aspect-auto h-56 w-full px-2 pb-2">
+    <ChartContainer
+      config={chartConfig}
+      className="aspect-auto h-56 w-full px-2 pb-2 [-webkit-tap-highlight-color:transparent] [&_*:focus:not(:focus-visible)]:outline-none"
+    >
       <BarChart data={chartData} margin={{ left: 0, right: 8, top: 8 }}>
         <CartesianGrid vertical={false} />
         <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
@@ -47,36 +142,62 @@ function WorkBars({ data, view }: { data: WorkChart; view: ChartView }) {
           tickFormatter={(value: number) => `${value}`}
         />
         <ChartTooltip
-          content={
-            <ChartTooltipContent
-              formatter={(value, _name, item) => (
-                <span className="font-mono font-medium tabular-nums">
-                  {formatDuration(workMsFromTooltip(value, item.payload))}
-                </span>
-              )}
+          cursor={false}
+          content={(props) => (
+            <ActivityTooltip
+              active={props.active}
+              label={props.label}
+              payload={props.payload}
             />
-          }
+          )}
         />
-        <Bar dataKey="hours" fill="var(--color-hours)" radius={4} maxBarSize={48} />
+        {CHART_BAR_STATES.map((state) => (
+          <Bar
+            key={state}
+            dataKey={state}
+            stackId="activity"
+            fill={`var(--color-${state})`}
+            radius={0}
+            maxBarSize={48}
+            activeBar={false}
+          />
+        ))}
       </BarChart>
     </ChartContainer>
   );
 }
 
 export function WorkChartPanel() {
-  const { data, isLoading, error } = useWorkChart();
+  const { data, status, isLoading, error } = useWorkChart();
   const [view, setView] = useState<ChartView>("week");
-  const averageMs =
-    data == null ? 0 : view === "week" ? data.week.averageMs : data.month.averageMs;
+  const averages =
+    data == null ? null : view === "week" ? data.week.averages : data.month.averages;
+
+  const currentLine =
+    status == null
+      ? "…"
+      : `${formatCurrentStateHeading(status.state)} ${formatStatusDuration(status.currentMinutes * 60_000)}`;
 
   return (
     <section className="mt-8 border-t border-border">
       <div className="flex items-center justify-between gap-3 px-3 py-2">
         <div className="min-w-0">
-          <p className="text-sm font-medium">Work</p>
+          <p className="text-sm font-medium">Activity</p>
           <p className="font-mono text-sm tabular-nums text-muted-foreground">
-            {isLoading ? "…" : error ? error : `${formatDuration(averageMs)} / day`}
+            {isLoading ? "…" : error ? error : currentLine}
           </p>
+          {!isLoading && !error && averages ? (
+            <div className="mt-0.5 grid gap-0.5 font-mono text-xs tabular-nums text-muted-foreground">
+              {AVERAGE_ROWS.map(({ key, label, icon: Icon }) => (
+                <p key={key} className="flex items-center gap-1.5">
+                  <Icon className="size-3 shrink-0" aria-hidden />
+                  <span>
+                    {label} {formatDuration(averages[key])} / day
+                  </span>
+                </p>
+              ))}
+            </div>
+          ) : null}
         </div>
         <div className="flex shrink-0 gap-1">
           <Button
