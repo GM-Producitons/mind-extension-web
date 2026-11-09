@@ -135,6 +135,7 @@ function DetailBody({
       </dl>
       <PaceBoxes
         icon={bar.icon}
+        color={bar.color}
         done={bar.done}
         owed={bar.owed}
         recentDone={bar.recentDone}

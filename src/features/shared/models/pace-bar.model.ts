@@ -19,6 +19,7 @@ const PaceBarSchema = new mongoose.Schema(
     name: { type: String, required: true },
     icon: { type: String, required: true },
     unit: { type: String, required: true },
+    color: { type: String, default: null },
     groupId: { type: mongoose.Schema.Types.ObjectId, default: null },
     startDate: { type: String, required: true },
     expectedRule: { type: ExpectedRuleSchema, required: true },

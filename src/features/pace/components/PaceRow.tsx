@@ -82,6 +82,7 @@ export function PaceBarRow({
       </span>
       <PaceBoxes
         icon={bar.icon}
+        color={bar.color}
         done={bar.done}
         owed={bar.owed}
         recentDone={bar.recentDone}
@@ -115,6 +116,7 @@ export function PaceGroupRow({ group }: { group: PaceGroupView }) {
       <span className="mt-2 block border-2 border-pace-frame p-1">
         <PaceBoxes
           icon={group.icon}
+          color={group.color}
           done={group.done}
           owed={group.owed}
           recentDone={group.recentDone}

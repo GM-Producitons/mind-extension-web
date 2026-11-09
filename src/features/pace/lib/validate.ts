@@ -33,6 +33,7 @@ export function parseGroupInput(body: unknown): GroupInput {
     icon: parseIcon(record.icon),
     unit: parseUnit(record.unit),
   };
+  if (record.color !== undefined) input.color = parseColor(record.color);
   if (record.order !== undefined) input.order = parseOrder(record.order);
   return input;
 }
@@ -43,6 +44,7 @@ export function parseGroupPatch(body: unknown): GroupPatch {
   if (record.name !== undefined) patch.name = parseName(record.name);
   if (record.icon !== undefined) patch.icon = parseIcon(record.icon);
   if (record.unit !== undefined) patch.unit = parseUnit(record.unit);
+  if (record.color !== undefined) patch.color = parseColor(record.color);
   if (record.order !== undefined) patch.order = parseOrder(record.order);
   if (record.archived !== undefined) patch.archived = parseArchived(record.archived);
   if (Object.keys(patch).length === 0) throw new PaceError("No changes", 400);
@@ -60,6 +62,7 @@ export function parseBarInput(body: unknown): BarInput {
   };
   if (record.groupId !== undefined) input.groupId = parseGroupRef(record.groupId);
   if (record.noteChips !== undefined) input.noteChips = parseChips(record.noteChips);
+  if (record.color !== undefined) input.color = parseColor(record.color);
   if (record.order !== undefined) input.order = parseOrder(record.order);
   return input;
 }
@@ -74,6 +77,7 @@ export function parseBarPatch(body: unknown): BarPatch {
   if (record.startDate !== undefined) patch.startDate = parseDate(record.startDate, "Start date");
   if (record.expectedRule !== undefined) patch.expectedRule = parseRule(record.expectedRule);
   if (record.noteChips !== undefined) patch.noteChips = parseChips(record.noteChips);
+  if (record.color !== undefined) patch.color = parseColor(record.color);
   if (record.order !== undefined) patch.order = parseOrder(record.order);
   if (record.archived !== undefined) patch.archived = parseArchived(record.archived);
   if (Object.keys(patch).length === 0) throw new PaceError("No changes", 400);
@@ -140,6 +144,14 @@ function parseName(value: unknown): string {
   const name = value.trim();
   if (name.length > 80) throw new PaceError("Name is too long", 400);
   return name;
+}
+
+function parseColor(value: unknown): string | null {
+  if (value === null) return null;
+  if (typeof value !== "string" || !/^#[0-9a-fA-F]{6}$/.test(value.trim())) {
+    throw new PaceError("Color must be a #RRGGBB hex", 400);
+  }
+  return value.trim().toLowerCase();
 }
 
 function parseIcon(value: unknown): string {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { parseEntryInput, parseRule, slugify } from "./validate";
+import { DEFAULT_PACE_COLOR, resolvePaceColor } from "./colors";
+import { parseBarInput, parseBarPatch, parseEntryInput, parseGroupInput, parseGroupPatch, parseRule, slugify } from "./validate";
 import {
   addMonthsClamped,
   cairoToday,
@@ -110,6 +111,34 @@ describe("foldEntries", () => {
       amount: 2,
       note: "library",
     });
+  });
+});
+
+describe("pace color", () => {
+  it("uses a bar color, then the group color, then the default token", () => {
+    expect(resolvePaceColor("#8b5cf6", "#10b981")).toBe("#8b5cf6");
+    expect(resolvePaceColor(null, "#10b981")).toBe("#10b981");
+    expect(resolvePaceColor(null, null)).toBe(DEFAULT_PACE_COLOR);
+    expect(resolvePaceColor("red", "nope")).toBe(DEFAULT_PACE_COLOR);
+  });
+
+  it("accepts a hex color and a cleared color", () => {
+    expect(
+      parseGroupInput({ name: "College", icon: "graduation-cap", unit: "h", color: "#8B5CF6" }).color,
+    ).toBe("#8b5cf6");
+    expect(parseGroupPatch({ color: null })).toEqual({ color: null });
+    expect(
+      parseBarInput({
+        name: "OS",
+        icon: "cpu",
+        unit: "h",
+        startDate: "2026-09-01",
+        expectedRule: { type: "events" },
+        color: null,
+      }).color,
+    ).toBeNull();
+    expect(parseBarPatch({ color: "#112233" })).toEqual({ color: "#112233" });
+    expect(() => parseBarPatch({ color: "violet" })).toThrow(/Color/);
   });
 });
 

@@ -20,6 +20,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ConfirmDialog } from "@/features/shared/template/confirm-dialog";
+import { cn } from "@/lib/utils";
+import {
+  DEFAULT_PACE_COLOR,
+  DEFAULT_PACE_COLOR_HEX,
+  isPaceHex,
+  PACE_COLORS,
+} from "../lib/colors";
 import { PACE_ICONS } from "../lib/icons";
 import type { PaceBarView, PaceGroupView, PacePeriod } from "../types";
 import { PaceIcon } from "./PaceIcon";
@@ -107,6 +114,7 @@ function PaceFormBody({
   const [kind, setKind] = useState<"group" | "bar">(editingGroup ? "group" : "bar");
   const [name, setName] = useState(editingGroup?.name ?? editingBar?.name ?? "");
   const [icon, setIcon] = useState(editingGroup?.icon ?? editingBar?.icon ?? "target");
+  const [color, setColor] = useState<string | null>(initialColor(editingGroup, editingBar));
   const [unit, setUnit] = useState(editingGroup?.unit ?? editingBar?.unit ?? locked?.unit ?? "");
   const [groupSlug, setGroupSlug] = useState(
     locked?.slug ?? editingBar?.groupSlug ?? "solo",
@@ -122,6 +130,8 @@ function PaceFormBody({
   const [pending, setPending] = useState(false);
 
   const selectedGroup = groups.find((group) => group.slug === groupSlug) ?? null;
+  const parent = kind === "bar" ? (locked ?? selectedGroup) : null;
+  const previewColor = color ?? parent?.color ?? (kind === "group" ? DEFAULT_PACE_COLOR_HEX : DEFAULT_PACE_COLOR);
   const unitLocked = kind === "bar" && (locked != null || selectedGroup != null);
   const shownUnit = locked?.unit ?? selectedGroup?.unit ?? unit;
   const canSave = name.trim().length > 0 && shownUnit.trim().length > 0 && !pending;
@@ -154,7 +164,12 @@ function PaceFormBody({
 
   const submit = () => {
     if (kind === "group") {
-      const input = { name: name.trim(), icon, unit: unit.trim() };
+      const input = {
+        name: name.trim(),
+        icon,
+        unit: unit.trim(),
+        color: color ?? DEFAULT_PACE_COLOR_HEX,
+      };
       return editingGroup
         ? onUpdateGroup(editingGroup.slug, input)
         : onCreateGroup(input);
@@ -163,6 +178,7 @@ function PaceFormBody({
       name: name.trim(),
       icon,
       unit: shownUnit.trim(),
+      color,
       groupId: locked?.slug ?? (groupSlug === "solo" ? null : groupSlug),
       startDate,
       expectedRule:
@@ -198,7 +214,15 @@ function PaceFormBody({
             <Button type="button" variant={kind === "bar" ? "default" : "outline"} className="h-11" onClick={() => setKind("bar")}>
               Bar
             </Button>
-            <Button type="button" variant={kind === "group" ? "default" : "outline"} className="h-11" onClick={() => setKind("group")}>
+            <Button
+              type="button"
+              variant={kind === "group" ? "default" : "outline"}
+              className="h-11"
+              onClick={() => {
+                setKind("group");
+                setColor((current) => current ?? DEFAULT_PACE_COLOR_HEX);
+              }}
+            >
               Group
             </Button>
           </div>
@@ -225,7 +249,11 @@ function PaceFormBody({
                     className={icon === item.id ? "flex h-11 w-11 items-center justify-center border border-primary" : "flex h-11 w-11 items-center justify-center border border-border"}
                     onClick={() => setIcon(item.id)}
                   >
-                    <PaceIcon name={item.id} className="size-4" />
+                    <PaceIcon
+                      name={item.id}
+                      className="size-5"
+                      style={icon === item.id ? { color: previewColor } : undefined}
+                    />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>{item.label}</TooltipContent>
@@ -233,6 +261,11 @@ function PaceFormBody({
             ))}
           </div>
         </div>
+        <PaceColorField
+          color={kind === "group" ? (color ?? DEFAULT_PACE_COLOR_HEX) : color}
+          inherit={parent ? { label: parent.name, color: parent.color } : null}
+          onChange={setColor}
+        />
         <div className="grid gap-1">
           <Label htmlFor="pace-unit">Unit</Label>
           <Input
@@ -368,6 +401,88 @@ function PaceFormBody({
         ) : null}
       </div>
     </TooltipProvider>
+  );
+}
+
+function initialColor(group: PaceGroupView | null, bar: PaceBarView | null): string | null {
+  if (group) return group.ownColor ?? DEFAULT_PACE_COLOR_HEX;
+  if (bar) return bar.ownColor;
+  return null;
+}
+
+function PaceColorField({
+  color,
+  inherit,
+  onChange,
+}: {
+  color: string | null;
+  inherit: { label: string; color: string } | null;
+  onChange: (color: string | null) => void;
+}) {
+  const selected = color ?? (inherit ? null : DEFAULT_PACE_COLOR_HEX);
+  const custom = color != null && !PACE_COLORS.some((item) => item.value === color);
+  const pickerValue =
+    color && isPaceHex(color)
+      ? color
+      : inherit && isPaceHex(inherit.color)
+        ? inherit.color
+        : DEFAULT_PACE_COLOR_HEX;
+
+  return (
+    <div className="grid gap-1">
+      <Label>Color</Label>
+      <div className="flex flex-wrap gap-1">
+        {inherit ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                aria-label={`Use ${inherit.label} color`}
+                aria-pressed={color == null}
+                className={cn(
+                  "h-11 border px-2 font-pixel text-[10px] tracking-wide",
+                  color == null ? "border-primary" : "border-border",
+                )}
+                style={{ color: inherit.color }}
+                onClick={() => onChange(null)}
+              >
+                Group
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>{inherit.label}</TooltipContent>
+          </Tooltip>
+        ) : null}
+        {PACE_COLORS.map((item) => (
+          <Tooltip key={item.id}>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                aria-label={item.label}
+                aria-pressed={selected === item.value}
+                className={cn(
+                  "flex h-11 w-11 items-center justify-center border",
+                  selected === item.value ? "border-primary" : "border-border",
+                )}
+                onClick={() => onChange(item.value)}
+              >
+                <span className="size-5" style={{ backgroundColor: item.value }} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>{item.label}</TooltipContent>
+          </Tooltip>
+        ))}
+        <input
+          type="color"
+          aria-label="Custom color"
+          value={pickerValue}
+          onChange={(event) => onChange(event.target.value.toLowerCase())}
+          className={cn(
+            "h-11 w-11 cursor-pointer border bg-transparent p-1",
+            custom ? "border-primary" : "border-border",
+          )}
+        />
+      </div>
+    </div>
   );
 }
 

@@ -97,6 +97,7 @@ When adding:
 - Pace compares done with expected. Done only increases. Falling behind raises expected. Totals are computed, never stored. Amounts are positive integers, one box per unit.
 - Schedule expected is owed on the start date, then again after each full Cairo period: a day, 7 days, or the same day-of-month (clamped to the month’s last day and anchored to the original day). A bar can grow by schedule, events, or both. Note chips are stored on the bar.
 - Entries are append-only. Undo sets `voidedAt`. The UI voids only the latest non-voided `ui` entry on that bar. `PACE_API_KEY` (`x-api-key` on `/api/pace/*` only) can create groups and bars, post entries, and void `grok` entries. Slugs are fixed at create. Children share the group’s unit. Online only.
+- A pace color paints the icon and the done boxes together. Owed boxes stay red. A group color is inherited by every child that does not set its own. A bar color overrides the group. Unset color uses the orange `--pace-done` token. Stored colors are `#rrggbb` or null.
 
 ## Client state
 

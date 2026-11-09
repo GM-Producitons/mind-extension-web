@@ -6,6 +6,7 @@ const PaceGroupSchema = new mongoose.Schema(
     name: { type: String, required: true },
     icon: { type: String, required: true },
     unit: { type: String, required: true },
+    color: { type: String, default: null },
     order: { type: Number, required: true },
     archived: { type: Boolean, default: false },
   },
