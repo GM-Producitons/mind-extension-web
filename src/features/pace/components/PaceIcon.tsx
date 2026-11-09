@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import {
   Activity,
   BookOpen,
@@ -46,7 +47,15 @@ const ICONS: Record<PaceIconId, LucideIcon> = {
   zap: Zap,
 };
 
-export function PaceIcon({ name, className }: { name: string; className?: string }) {
+export function PaceIcon({
+  name,
+  className,
+  style,
+}: {
+  name: string;
+  className?: string;
+  style?: CSSProperties;
+}) {
   const Icon = isPaceIcon(name) ? ICONS[name] : Target;
-  return <Icon className={className} aria-hidden />;
+  return <Icon className={className} style={style} aria-hidden />;
 }

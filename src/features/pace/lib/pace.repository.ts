@@ -20,6 +20,7 @@ interface GroupDoc {
   name: string;
   icon: string;
   unit: string;
+  color?: string | null;
   order: number;
   archived?: boolean;
   createdAt?: Date;
@@ -31,6 +32,7 @@ interface BarDoc {
   name: string;
   icon: string;
   unit: string;
+  color?: string | null;
   groupId?: { toString(): string } | null;
   startDate: string;
   expectedRule: ExpectedRule;
@@ -79,6 +81,10 @@ export function isDuplicateKey(error: unknown): boolean {
   return false;
 }
 
+function storedColor(value: string | null | undefined): string | null {
+  return typeof value === "string" && /^#[0-9a-f]{6}$/.test(value) ? value : null;
+}
+
 function activeFilter(activeOnly: boolean) {
   return activeOnly ? { archived: { $ne: true } } : {};
 }
@@ -95,6 +101,7 @@ function mapGroup(doc: GroupDoc): PaceGroupRecord {
     name: doc.name,
     icon: doc.icon,
     unit: doc.unit,
+    color: storedColor(doc.color),
     order: doc.order,
     archived: doc.archived === true,
     createdAt: doc.createdAt ?? new Date(),
@@ -108,6 +115,7 @@ function mapBar(doc: BarDoc): PaceBarRecord {
     name: doc.name,
     icon: doc.icon,
     unit: doc.unit,
+    color: storedColor(doc.color),
     groupId: doc.groupId ? doc.groupId.toString() : null,
     startDate: doc.startDate,
     expectedRule: doc.expectedRule,
@@ -204,6 +212,7 @@ export async function insertGroup(input: {
   name: string;
   icon: string;
   unit: string;
+  color: string | null;
   order: number;
 }): Promise<PaceGroupRecord> {
   await ready();
@@ -216,6 +225,7 @@ export async function insertBar(input: {
   name: string;
   icon: string;
   unit: string;
+  color: string | null;
   groupId: string | null;
   startDate: string;
   expectedRule: ExpectedRule;

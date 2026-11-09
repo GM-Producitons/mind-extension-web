@@ -28,6 +28,7 @@ import {
   scheduleExpected,
   type FoldResult,
 } from "../lib/pace-math";
+import { resolvePaceColor } from "../lib/colors";
 import { slugify } from "../lib/validate";
 import type {
   BarInput,
@@ -93,6 +94,7 @@ export async function createGroup(input: GroupInput): Promise<{ group: PaceGroup
       name: input.name,
       icon: input.icon,
       unit: input.unit,
+      color: input.color ?? null,
       order,
     });
     return { group: toGroupView(group, []) };
@@ -128,6 +130,7 @@ export async function createBar(input: BarInput): Promise<{ bar: PaceBarView }> 
       name: input.name,
       icon: input.icon,
       unit: input.unit,
+      color: input.color ?? null,
       groupId: group?.id ?? null,
       startDate: input.startDate,
       expectedRule: cleanRule(input.expectedRule),
@@ -369,6 +372,8 @@ function toBarView(
     name: bar.name,
     icon: bar.icon,
     unit: bar.unit,
+    color: resolvePaceColor(bar.color, group?.color),
+    ownColor: bar.color,
     groupId: bar.groupId,
     groupSlug: group?.slug ?? null,
     startDate: bar.startDate,
@@ -397,6 +402,8 @@ function toGroupView(group: PaceGroupRecord, children: PaceBarView[]): PaceGroup
     name: group.name,
     icon: group.icon,
     unit: group.unit,
+    color: resolvePaceColor(group.color),
+    ownColor: group.color,
     order: group.order,
     archived: group.archived,
     createdAt: group.createdAt.toISOString(),

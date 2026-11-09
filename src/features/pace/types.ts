@@ -23,6 +23,10 @@ export interface PaceBarView {
   name: string;
   icon: string;
   unit: string;
+  /** Resolved paint color: own, else the group, else the pace token. */
+  color: string;
+  /** Stored override. Null inherits the group, or the default when solo. */
+  ownColor: string | null;
   groupId: string | null;
   groupSlug: string | null;
   startDate: string;
@@ -46,6 +50,10 @@ export interface PaceGroupView {
   name: string;
   icon: string;
   unit: string;
+  /** Resolved paint color. */
+  color: string;
+  /** Stored color. Null uses the default pace token. */
+  ownColor: string | null;
   order: number;
   archived: boolean;
   createdAt: string;
@@ -85,6 +93,7 @@ export interface PaceGroupRecord {
   name: string;
   icon: string;
   unit: string;
+  color: string | null;
   order: number;
   archived: boolean;
   createdAt: Date;
@@ -96,6 +105,7 @@ export interface PaceBarRecord {
   name: string;
   icon: string;
   unit: string;
+  color: string | null;
   groupId: string | null;
   startDate: string;
   expectedRule: ExpectedRule;
@@ -123,6 +133,7 @@ export interface GroupInput {
   name: string;
   icon: string;
   unit: string;
+  color?: string | null;
   order?: number;
 }
 
@@ -130,6 +141,7 @@ export interface GroupPatch {
   name?: string;
   icon?: string;
   unit?: string;
+  color?: string | null;
   order?: number;
   archived?: boolean;
 }
@@ -142,6 +154,7 @@ export interface BarInput {
   startDate: string;
   expectedRule: ExpectedRule;
   noteChips?: string[];
+  color?: string | null;
   order?: number;
 }
 
@@ -153,6 +166,7 @@ export interface BarPatch {
   startDate?: string;
   expectedRule?: ExpectedRule;
   noteChips?: string[];
+  color?: string | null;
   order?: number;
   archived?: boolean;
 }
