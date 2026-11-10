@@ -193,6 +193,7 @@ export default function Dashboard({
         )}
         <PaceHome />
         <WorkChartPanel />
+        <div className="h-36 md:hidden" aria-hidden />
       </div>
     </BackgroundProvider>
   );
