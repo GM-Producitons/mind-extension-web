@@ -90,7 +90,7 @@ When adding:
 - "Today" is the Africa/Cairo calendar day. Time math stays in `src/features/activity/lib/activity-time.ts`.
 - MacroDroid calls `GET /api/activity/status` and `POST /api/activity/toggle` with body `{ "state": "<state>" }`. Plain text by default; `?format=json` on status. `Cache-Control: no-store`, header `x-api-key` must match `ACTIVITY_API_KEY`.
 - Toggle has a TODO where Ably publish will go. Do not add multi-user support until that feature needs it.
-- The dashboard work chart replaces the app list. It shows average tracked time per day, the last 7 Cairo days, and the last 4 weeks, stacked by state. Rollups: **focus** (work + study + personal), **training**, **tracked** (all stored states except sleep), and a separate **sleep** average. Day popovers show the same three rollups (focus, training, tracked).
+- The dashboard work chart replaces the app list. It shows average tracked time per day, the last 7 Cairo days, and the last 4 weeks, stacked by state. Rollups: **focus** (work + study + personal), **training**, **tracked** (all stored states except sleep), and a separate **sleep** average. Day popovers show the same three rollups (focus, training, tracked). Activity state colors are tokens `--activity-*` in `globals.css`; charts and legends use icons plus proportional horizontal bars, not text labels.
 
 ## Pace
 

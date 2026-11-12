@@ -120,6 +120,23 @@ function series(bars: WorkBar[], dayCount: number): WorkChartSeries {
   };
 }
 
+export function averageByStateMs(
+  bars: WorkBar[],
+  dayCount: number,
+): Record<StoredActivityState, number> {
+  const sum = emptyStateTotalsMs();
+  for (const bar of bars) {
+    for (const state of STORED_ACTIVITY_STATES) {
+      sum[state] += bar.byStateMs[state];
+    }
+  }
+  const averages = emptyStateTotalsMs();
+  for (const state of STORED_ACTIVITY_STATES) {
+    averages[state] = Math.floor(sum[state] / dayCount);
+  }
+  return averages;
+}
+
 export function buildWorkChart(
   sessions: ActivitySessionSpan[],
   now: Date,

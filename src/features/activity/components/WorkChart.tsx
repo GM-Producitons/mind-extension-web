@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import type { RectangleProps } from "recharts";
 import { Brain, Clock3, Dumbbell, Moon } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,23 +12,40 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import {
-  ACTIVITY_ROLLUP_LABELS,
+  ActivityLegendRow,
+  ActivityProportionalBar,
+} from "./ActivityProportionalBar";
+import {
+  ACTIVITY_STATE_ICONS,
+  activityStateColor,
+  segmentsFromStates,
+} from "../lib/activity-state-visual";
+import {
   CHART_BAR_STATES,
+  FOCUS_ACTIVITY_STATES,
+  emptyStateTotalsMs,
+  focusTotalMs,
   formatCurrentStateHeading,
-  STATUS_TOTAL_LABELS,
   STORED_ACTIVITY_STATES,
-  type ActivityRollupTotals,
+  TRACKED_ACTIVITY_STATES,
+  trackedTotalMs,
+  trainingTotalMs,
+  type StoredActivityState,
 } from "../lib/activity-states";
-import type { WorkBar, WorkChart } from "../lib/activity-chart";
+import {
+  averageByStateMs,
+  type WorkBar,
+  type WorkChart,
+} from "../lib/activity-chart";
 import { formatDuration, formatStatusDuration } from "../lib/activity-time";
 import { useWorkChart } from "../hooks/use-work-chart";
 
-const GREY_OPACITIES = [0.28, 0.34, 0.4, 0.46, 0.52, 0.58, 0.64, 0.7, 0.76] as const;
+const VIEW_DAY_COUNT = { week: 7, month: 28 } as const;
 
-const chartConfig = STORED_ACTIVITY_STATES.reduce((config, state, index) => {
+const chartConfig = STORED_ACTIVITY_STATES.reduce((config, state) => {
   config[state] = {
-    label: STATUS_TOTAL_LABELS[state],
-    color: `color-mix(in oklch, var(--muted-foreground) ${Math.round(GREY_OPACITIES[index] * 100)}%, transparent)`,
+    label: state,
+    color: activityStateColor(state),
   };
   return config;
 }, {} as ChartConfig);
@@ -35,24 +53,71 @@ const chartConfig = STORED_ACTIVITY_STATES.reduce((config, state, index) => {
 type ChartView = "week" | "month";
 
 const AVERAGE_ROWS: {
-  key: keyof ActivityRollupTotals;
-  label: string;
   icon: LucideIcon;
+  states: readonly StoredActivityState[];
+  duration: (avgByState: Record<StoredActivityState, number>) => number;
 }[] = [
-  { key: "focusMs", label: ACTIVITY_ROLLUP_LABELS.focus, icon: Brain },
-  { key: "trainingMs", label: ACTIVITY_ROLLUP_LABELS.training, icon: Dumbbell },
-  { key: "trackedMs", label: ACTIVITY_ROLLUP_LABELS.tracked, icon: Clock3 },
-  { key: "sleepMs", label: ACTIVITY_ROLLUP_LABELS.sleep, icon: Moon },
+  {
+    icon: Brain,
+    states: FOCUS_ACTIVITY_STATES,
+    duration: (avg) => focusTotalMs(avg),
+  },
+  {
+    icon: Dumbbell,
+    states: ["training"],
+    duration: (avg) => trainingTotalMs(avg),
+  },
+  {
+    icon: Clock3,
+    states: TRACKED_ACTIVITY_STATES,
+    duration: (avg) => trackedTotalMs(avg),
+  },
+  {
+    icon: Moon,
+    states: ["sleep"],
+    duration: (avg) => avg.sleep,
+  },
 ];
 
-function barRow(bar: WorkBar) {
-  const row: Record<string, string | number> = {
-    label: bar.label,
-    focusTotalMs: bar.totals.focusMs,
-    trainingTotalMs: bar.totals.trainingMs,
-    trackedTotalMs: bar.totals.trackedMs,
-    sleepTotalMs: bar.totals.sleepMs,
+function makeActivityStackShape(state: StoredActivityState) {
+  const Icon = ACTIVITY_STATE_ICONS[state];
+  return function ActivityStackShape(props: RectangleProps) {
+    const { x = 0, y = 0, width = 0, height = 0, fill } = props;
+    const showIcon = height >= 20 && width >= 12;
+    return (
+      <g>
+        <rect x={x} y={y} width={width} height={height} fill={fill} />
+        {showIcon ? (
+          <foreignObject
+            x={x}
+            y={y}
+            width={width}
+            height={height}
+            className="pointer-events-none"
+          >
+            <div className="flex h-full w-full items-center justify-center">
+              <Icon
+                className="size-3 text-primary-foreground opacity-95"
+                aria-hidden
+              />
+            </div>
+          </foreignObject>
+        ) : null}
+      </g>
+    );
   };
+}
+
+const stackShapes = CHART_BAR_STATES.reduce(
+  (shapes, state) => {
+    shapes[state] = makeActivityStackShape(state);
+    return shapes;
+  },
+  {} as Record<StoredActivityState, (props: RectangleProps) => React.JSX.Element>,
+);
+
+function barRow(bar: WorkBar) {
+  const row: Record<string, string | number> = { label: bar.label };
   for (const state of STORED_ACTIVITY_STATES) {
     row[`${state}Ms`] = bar.byStateMs[state];
   }
@@ -62,9 +127,16 @@ function barRow(bar: WorkBar) {
   return row;
 }
 
-function msInRow(row: Record<string, string | number> | undefined, key: string) {
-  const ms = row?.[key];
-  return typeof ms === "number" ? ms : 0;
+function byStateMsFromRow(
+  row: Record<string, string | number> | undefined,
+): Record<StoredActivityState, number> {
+  const totals = emptyStateTotalsMs();
+  if (!row) return totals;
+  for (const state of STORED_ACTIVITY_STATES) {
+    const ms = row[`${state}Ms`];
+    totals[state] = typeof ms === "number" ? ms : 0;
+  }
+  return totals;
 }
 
 function ActivityTooltip({
@@ -79,45 +151,32 @@ function ActivityTooltip({
   if (!active || !payload?.length) return null;
 
   const row = payload[0]?.payload;
-  const lines = STORED_ACTIVITY_STATES.flatMap((state) => {
-    const ms = msInRow(row, `${state}Ms`);
-    if (ms <= 0) return [];
-    return [{ state, ms }];
-  });
-  const rollupRows = [
-    { key: "focusTotalMs", label: ACTIVITY_ROLLUP_LABELS.focus },
-    { key: "trainingTotalMs", label: ACTIVITY_ROLLUP_LABELS.training },
-    { key: "trackedTotalMs", label: ACTIVITY_ROLLUP_LABELS.tracked },
-  ] as const;
+  const byStateMs = byStateMsFromRow(row);
+  const dayMs = STORED_ACTIVITY_STATES.reduce(
+    (sum, state) => sum + byStateMs[state],
+    0,
+  );
 
   return (
-    <div className="grid min-w-40 gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+    <div className="grid w-52 gap-2 rounded-lg border border-border/50 bg-background px-2.5 py-2 text-xs shadow-xl">
       <p className="font-medium">{label}</p>
-      <div className="grid gap-1">
-        {lines.map(({ state, ms }) => (
-          <div key={state} className="flex items-center justify-between gap-4">
-            <span className="flex items-center gap-1.5 text-muted-foreground">
-              <span
-                className="size-2 shrink-0 rounded-[2px]"
-                style={{ backgroundColor: `var(--color-${state})` }}
-              />
-              {STATUS_TOTAL_LABELS[state]}
-            </span>
-            <span className="font-mono font-medium tabular-nums">
-              {formatDuration(ms)}
-            </span>
-          </div>
+      <ActivityProportionalBar
+        segments={segmentsFromStates(byStateMs, STORED_ACTIVITY_STATES)}
+        heightClass="h-5"
+      />
+      <p className="text-right font-mono text-[10px] tabular-nums text-muted-foreground">
+        {formatDuration(dayMs)}
+      </p>
+      <div className="grid gap-1 border-t border-border pt-1.5">
+        {AVERAGE_ROWS.map(({ icon, states, duration }) => (
+          <ActivityLegendRow
+            key={states.join("-")}
+            icon={icon}
+            segments={segmentsFromStates(byStateMs, states)}
+            durationMs={duration(byStateMs)}
+            barHeightClass="h-3"
+          />
         ))}
-        <div className="grid gap-1 border-t border-border pt-1">
-          {rollupRows.map(({ key, label: rollupLabel }) => (
-            <div key={key} className="flex items-center justify-between gap-4">
-              <span className="text-muted-foreground">{rollupLabel}</span>
-              <span className="font-mono font-medium tabular-nums">
-                {formatDuration(msInRow(row, key))}
-              </span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -157,6 +216,7 @@ function WorkBars({ data, view }: { data: WorkChart; view: ChartView }) {
             dataKey={state}
             stackId="activity"
             fill={`var(--color-${state})`}
+            shape={stackShapes[state]}
             radius={0}
             maxBarSize={48}
             activeBar={false}
@@ -170,8 +230,12 @@ function WorkBars({ data, view }: { data: WorkChart; view: ChartView }) {
 export function WorkChartPanel() {
   const { data, status, isLoading, error } = useWorkChart();
   const [view, setView] = useState<ChartView>("week");
-  const averages =
-    data == null ? null : view === "week" ? data.week.averages : data.month.averages;
+
+  const series = data == null ? null : view === "week" ? data.week : data.month;
+  const avgByState = useMemo(() => {
+    if (!series) return null;
+    return averageByStateMs(series.bars, VIEW_DAY_COUNT[view]);
+  }, [series, view]);
 
   const currentLine =
     status == null
@@ -181,20 +245,20 @@ export function WorkChartPanel() {
   return (
     <section className="mt-8 border-t border-border">
       <div className="flex items-center justify-between gap-3 px-3 py-2">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-medium">Activity</p>
           <p className="font-mono text-sm tabular-nums text-muted-foreground">
             {isLoading ? "…" : error ? error : currentLine}
           </p>
-          {!isLoading && !error && averages ? (
-            <div className="mt-0.5 grid gap-0.5 font-mono text-xs tabular-nums text-muted-foreground">
-              {AVERAGE_ROWS.map(({ key, label, icon: Icon }) => (
-                <p key={key} className="flex items-center gap-1.5">
-                  <Icon className="size-3 shrink-0" aria-hidden />
-                  <span>
-                    {label} {formatDuration(averages[key])} / day
-                  </span>
-                </p>
+          {!isLoading && !error && avgByState ? (
+            <div className="mt-1.5 grid gap-1">
+              {AVERAGE_ROWS.map(({ icon, states, duration }) => (
+                <ActivityLegendRow
+                  key={states.join("-")}
+                  icon={icon}
+                  segments={segmentsFromStates(avgByState, states)}
+                  durationMs={duration(avgByState)}
+                />
               ))}
             </div>
           ) : null}
