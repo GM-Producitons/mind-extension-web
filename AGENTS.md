@@ -85,7 +85,7 @@ When adding:
 
 ## Activity
 
-- Sessions store `startedAt`, `endedAt` (null while open), and `state` (`work`, `personal_projects`, `praying`, `eating`, `with_friends`, `mashawer`, `studying`, `training`, `sleep`). `free` is not stored; it means no open session. Free time today is elapsed Cairo time minus all logged session time (including sleep).
+- Sessions store `startedAt`, `endedAt` (null while open), and `state` (`work`, `personal_projects`, `praying`, `eating`, `with_friends`, `mashawer`, `studying`, `college`, `training`, `sleep`). `free` is not stored; it means no open session. Free time today is elapsed Cairo time minus all logged session time (including sleep).
 - At most one open session, enforced by a partial unique index on `open: true`.
 - "Today" is the Africa/Cairo calendar day. Time math stays in `src/features/activity/lib/activity-time.ts`.
 - MacroDroid calls `GET /api/activity/status` and `POST /api/activity/toggle` with body `{ "state": "<state>" }`. Plain text by default; `?format=json` on status. `Cache-Control: no-store`, header `x-api-key` must match `ACTIVITY_API_KEY`.

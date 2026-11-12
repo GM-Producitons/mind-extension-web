@@ -6,6 +6,7 @@ export const ACTIVITY_STATES = [
   "with_friends",
   "mashawer",
   "studying",
+  "college",
   "training",
   "sleep",
   "free",
@@ -47,6 +48,7 @@ export const STATUS_TOTAL_LABELS: Record<StoredActivityState, string> = {
   with_friends: "friends",
   mashawer: "mashawer",
   studying: "study",
+  college: "college",
   training: "training",
   sleep: "sleep",
 };
@@ -114,6 +116,7 @@ export function emptyStateTotalsMs(): Record<StoredActivityState, number> {
     with_friends: 0,
     mashawer: 0,
     studying: 0,
+    college: 0,
     training: 0,
     sleep: 0,
   };

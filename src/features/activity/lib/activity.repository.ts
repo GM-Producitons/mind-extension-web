@@ -30,7 +30,7 @@ async function ready() {
       );
       await ActivitySessionModel.collection.updateMany(
         { state: "college_training" },
-        { $set: { state: "training" } },
+        { $set: { state: "college" } },
       );
     })
     .catch((error: unknown) => {
