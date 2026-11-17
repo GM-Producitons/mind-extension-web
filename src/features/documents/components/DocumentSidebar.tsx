@@ -1,4 +1,5 @@
 import { Plus, Search } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Document, DocumentType } from "../types";
 import { DocumentListItem } from "./DocumentListItem";
 
@@ -55,7 +56,11 @@ export function DocumentSidebar({
       {/* List */}
       <div className="flex-1 overflow-y-auto px-2 pb-4">
         {isLoading ? (
-          <div className="mt-8 text-center text-xs text-white/30">Loading…</div>
+          <div className="grid gap-1 px-1">
+            {Array.from({ length: 6 }, (_, index) => (
+              <Skeleton key={index} className="h-8 w-full" />
+            ))}
+          </div>
         ) : documents.length === 0 ? (
           <div className="mt-8 text-center text-xs text-white/30">
             {searchQuery ? "No documents match." : "No documents yet."}

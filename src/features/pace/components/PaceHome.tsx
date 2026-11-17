@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { topOwedBars } from "../lib/pace-board";
 import { useOpenBar, usePaceBoard } from "../hooks/use-pace";
+import { PaceListSkeleton } from "@/features/shared/template/page-skeletons";
 import { PaceDetail } from "./PaceDetail";
 import { PaceBarRow } from "./PaceRow";
 
@@ -21,7 +22,7 @@ export function PaceHome() {
         </Link>
       </div>
       {pace.isLoading ? (
-        <p className="px-3 pb-2 text-xs text-muted-foreground">Loading</p>
+        <PaceListSkeleton rows={3} />
       ) : pace.error ? (
         <p className="px-3 pb-2 text-xs text-destructive">{pace.error}</p>
       ) : bars.length === 0 ? (

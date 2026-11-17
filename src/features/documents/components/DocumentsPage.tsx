@@ -6,6 +6,7 @@ import { DocumentSidebar } from "./DocumentSidebar";
 import { DocumentEditorHeader } from "./DocumentEditorHeader";
 import { DocumentEditor } from "./DocumentEditor";
 import { EmptyDocumentState } from "./EmptyDocumentState";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { DocumentType } from "../types";
 
 export function DocumentsPage() {
@@ -81,6 +82,14 @@ export function DocumentsPage() {
               onChange={handleContentChange}
             />
           </>
+        ) : isLoading ? (
+          <div className="flex flex-col gap-3 p-6">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-11/12" />
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
         ) : (
           <EmptyDocumentState onCreate={createDocument} />
         )}

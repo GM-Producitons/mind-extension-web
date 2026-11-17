@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import BackgroundProvider from "@/components/BackgroundProvider";
+import { TimelineSkeleton } from "@/features/shared/template/page-skeletons";
 import { WorkChartPanel } from "@/features/activity/components/WorkChart";
 import { PaceHome } from "@/features/pace/components/PaceHome";
 import GenTimeline from "@/features/timeline/components/GenTimeline";
@@ -185,9 +186,7 @@ export default function Dashboard({
           </Button>
         </div>
         {isLoadingTimeline ? (
-          <Card className="flex h-40 items-center justify-center text-muted-foreground">
-            Loading timeline...
-          </Card>
+          <TimelineSkeleton />
         ) : (
           <GenTimeline events={timelineEvents} onEventClick={onEventClick} />
         )}

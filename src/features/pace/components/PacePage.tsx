@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useState } from "react";
-import { PageHeader } from "@/features/shared/template/page-header";
+import { PaceListSkeleton } from "@/features/shared/template/page-skeletons";
 import { clearQuickCreate, hasQuickCreate, useQuickCreate } from "@/features/shared/store/quick-create.store";
 import { useOpenBar, usePaceBoard } from "../hooks/use-pace";
 import { PaceCaption } from "./PaceBoxes";
@@ -29,14 +29,8 @@ export function PacePage() {
 
   return (
     <main className="mx-auto flex min-h-full w-full max-w-3xl flex-col pb-24">
-      <PageHeader
-        title="Ana fen fel a7mad?"
-        size="sm"
-        className="px-3"
-        actions={[{ label: "Add", onClick: () => setForm({ mode: "create" }) }]}
-      />
       {pace.isLoading ? (
-        <p className="px-3 text-xs text-muted-foreground">Loading</p>
+        <PaceListSkeleton />
       ) : pace.error ? (
         <p className="px-3 text-xs text-destructive">{pace.error}</p>
       ) : pace.board && pace.board.groups.length === 0 && pace.board.solo.length === 0 ? (

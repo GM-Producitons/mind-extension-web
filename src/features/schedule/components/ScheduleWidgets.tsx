@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   ChartContainer,
   ChartTooltip,
@@ -94,7 +95,14 @@ export function FlashcardsWidget({
 }) {
   if (!stats) {
     return (
-      <div className="px-2 py-2 text-[10px] text-muted-foreground">Loading cards…</div>
+      <div className="grid gap-2 px-2 py-2">
+        <Skeleton className="h-3 w-16" />
+        <div className="flex gap-3">
+          <Skeleton className="h-8 w-12" />
+          <Skeleton className="h-8 w-16" />
+        </div>
+        <Skeleton className="h-8 w-full" />
+      </div>
     );
   }
   const barData = [

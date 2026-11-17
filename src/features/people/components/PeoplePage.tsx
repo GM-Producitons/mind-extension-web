@@ -1,29 +1,21 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
-import { PageHeader } from "@/features/shared/template/page-header";
+import { PeopleSkeleton } from "@/features/shared/template/page-skeletons";
 import { usePeopleGraph } from "../hooks/use-people-graph";
-import { CreatePersonDrawer } from "./CreatePersonDrawer";
 
 const PeopleForceGraph = dynamic(() => import("./PeopleForceGraph"), {
   ssr: false,
+  loading: () => <PeopleSkeleton />,
 });
 
 export function PeoplePage() {
-  const { graph, isLoading, error, reload } = usePeopleGraph();
-  const [createOpen, setCreateOpen] = useState(false);
+  const { graph, isLoading, error } = usePeopleGraph();
 
   return (
     <main className="mx-auto flex min-h-full w-full max-w-3xl flex-col pb-24">
-      <PageHeader
-        title="People"
-        size="sm"
-        className="px-3"
-        actions={[{ label: "Add", onClick: () => setCreateOpen(true) }]}
-      />
       {isLoading ? (
-        <p className="px-3 text-xs text-muted-foreground">Loading</p>
+        <PeopleSkeleton />
       ) : error ? (
         <p className="px-3 text-xs text-destructive">{error}</p>
       ) : graph.nodes.length === 0 ? (
@@ -31,11 +23,6 @@ export function PeoplePage() {
       ) : (
         <PeopleForceGraph graph={graph} />
       )}
-      <CreatePersonDrawer
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onCreated={() => void reload()}
-      />
     </main>
   );
 }

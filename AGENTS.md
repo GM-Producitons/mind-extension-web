@@ -26,7 +26,7 @@ When adding:
 - Layouts stay compact: small controls, tight padding, short row heights. A surface takes the minimum space needed to show its data.
 - Tables and lists show the relevant fields. Prefer many compact rows over a few large cards.
 - Do not nest cards. A group header is a muted bar, not a card wrapping a card.
-- One title per page, via `PageHeader` (`src/features/shared/template/page-header`). Do not render a second title block.
+- Feature landing pages do not show a feature-name title or a header Add button. The dock names the page and the + creates. Entity titles (a person, a pace group, a practice set) can stay. Do not add a second title block.
 
 ## Color, type, and icons
 
@@ -90,7 +90,7 @@ When adding:
 - "Today" is the Africa/Cairo calendar day. Time math stays in `src/features/activity/lib/activity-time.ts`.
 - MacroDroid calls `GET /api/activity/status` and `POST /api/activity/toggle` with body `{ "state": "<state>" }`. Plain text by default; `?format=json` on status. `Cache-Control: no-store`, header `x-api-key` must match `ACTIVITY_API_KEY`.
 - Toggle has a TODO where Ably publish will go. Do not add multi-user support until that feature needs it.
-- The dashboard work chart replaces the app list. It shows average tracked time per day, the last 7 Cairo days, and the last 4 weeks, stacked by state. Rollups: **focus** (work + study + personal), **training**, **tracked** (all stored states except sleep), and a separate **sleep** average. Day popovers show the same three rollups (focus, training, tracked). Activity state colors are tokens `--activity-*` in `globals.css`; charts and legends use icons plus proportional horizontal bars, not text labels.
+- The dashboard work chart replaces the app list. It shows average tracked time per day, the last 7 Cairo days, and the last 4 weeks, stacked by state. Rollups: **focus** (work + study + personal), **training**, **tracked** (all stored states except sleep), and a separate **sleep** average. Day popovers show the same rollups. Average rows scale by duration against the longest row in that set (2h is twice 1h). Segments inside one row stay proportional to that row. Activity state colors are tokens `--activity-*` in `globals.css`. A gear on the activity section stores per-state `#rrggbb` overrides in `localStorage` (`me-activity-colors`) and sets those variables on `documentElement`. Charts and legends use icons plus the bars, not text labels.
 
 ## Pace
 

@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
+import { ActivityColorSync } from "@/features/activity/components/ActivityColorSync";
 import { OfflineRuntime } from "@/features/offline/offline-runtime";
 
 export default function ClientProviders({
@@ -11,6 +12,7 @@ export default function ClientProviders({
 }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <ActivityColorSync />
       <OfflineRuntime />
       {children}
       <Toaster />

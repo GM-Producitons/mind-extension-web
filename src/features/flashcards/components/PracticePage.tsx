@@ -10,6 +10,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { PageHeader } from "@/features/shared/template/page-header";
+import { PracticeCardSkeleton } from "@/features/shared/template/page-skeletons";
 import { usePracticeSession } from "../hooks/use-practice-session";
 import { PracticeCard } from "./PracticeCard";
 
@@ -42,7 +43,7 @@ export function PracticePage({ clusterId }: PracticePageProps) {
         </div>
 
         {session.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading</p>
+          <PracticeCardSkeleton />
         ) : session.error ? (
           <p className="text-sm text-muted-foreground">{session.error}</p>
         ) : session.isEmpty ? (

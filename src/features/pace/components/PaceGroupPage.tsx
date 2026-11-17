@@ -6,6 +6,7 @@ import { ChevronLeft } from "lucide-react";
 import { PageHeader } from "@/features/shared/template/page-header";
 import { findGroup } from "../lib/pace-board";
 import { useOpenBar, usePaceBoard } from "../hooks/use-pace";
+import { PaceListSkeleton } from "@/features/shared/template/page-skeletons";
 import { PaceCaption } from "./PaceBoxes";
 import { PaceDetail } from "./PaceDetail";
 import { PaceForm, type FormMode } from "./PaceForm";
@@ -39,7 +40,7 @@ export function PaceGroupPage({ slug }: { slug: string }) {
         }
       />
       {pace.isLoading ? (
-        <p className="px-3 text-xs text-muted-foreground">Loading</p>
+        <PaceListSkeleton rows={4} />
       ) : pace.error ? (
         <p className="px-3 text-xs text-destructive">{pace.error}</p>
       ) : !group ? (

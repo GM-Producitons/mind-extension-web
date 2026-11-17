@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ConfirmDialog } from "@/features/shared/template/confirm-dialog";
 import { EmptyState } from "@/features/shared/template/empty-state";
-import { PageHeader } from "@/features/shared/template/page-header";
+import { FeedSkeleton } from "@/features/shared/template/page-skeletons";
 import { cn } from "@/lib/utils";
 import { useLayoutEffect, useRef } from "react";
 import { hasQuickCreate, useQuickCreate } from "@/features/shared/store/quick-create.store";
@@ -32,39 +32,32 @@ export function MyInstaPage() {
   return (
     <TooltipProvider>
       <div className="mx-auto w-full max-w-[470px]">
-        <div className="px-4 pt-4">
-          <PageHeader
-            title="MyInsta"
-            size="sm"
-            className="mb-3"
-            trailing={
-              page.pendingCount > 0 ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon-sm"
-                      aria-label="Sync"
-                      disabled={page.syncing}
-                      onClick={() => void page.syncNow()}
-                    >
-                      <RefreshCw className={cn(page.syncing && "animate-spin")} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Sync</TooltipContent>
-                </Tooltip>
-              ) : undefined
-            }
-          />
-        </div>
+        {page.pendingCount > 0 ? (
+          <div className="flex justify-end px-4 pt-4">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label="Sync"
+                  disabled={page.syncing}
+                  onClick={() => void page.syncNow()}
+                >
+                  <RefreshCw className={cn(page.syncing && "animate-spin")} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Sync</TooltipContent>
+            </Tooltip>
+          </div>
+        ) : null}
 
         {page.needsSignIn ? (
           <p className="px-4 text-sm text-muted-foreground">
             Sign in while online
           </p>
         ) : page.isLoading ? (
-          <p className="px-4 text-sm text-muted-foreground">Loading</p>
+          <FeedSkeleton />
         ) : page.posts.length === 0 ? (
           <EmptyState title="No posts" size="sm" />
         ) : (

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { ConfirmDialog } from "@/features/shared/template/confirm-dialog";
 import { useQuickCreate } from "@/features/shared/store/quick-create.store";
+import { ClusterGridSkeleton } from "@/features/shared/template/page-skeletons";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useFlashcardsPage } from "../hooks/use-flashcards-page";
 import { ClusterCard } from "./ClusterCard";
@@ -33,7 +34,7 @@ export function FlashcardsPage() {
         />
 
         {page.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading</p>
+          <ClusterGridSkeleton />
         ) : page.visibleClusters.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {page.hasSearch ? "No matches" : "No clusters"}

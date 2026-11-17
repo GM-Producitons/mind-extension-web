@@ -53,7 +53,7 @@ export function useDocuments(): UseDocumentsApi {
   const documentsRef = useRef<Document[]>(documents);
   documentsRef.current = documents;
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 

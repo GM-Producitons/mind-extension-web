@@ -9,6 +9,8 @@ import {
 } from "@ably/chat/react";
 import { ChatMessageEvent, ChatMessageEventType } from "@ably/chat";
 import { getMessages, saveMessage } from "./api/CRUD";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ChatSkeleton } from "@/features/shared/template/page-skeletons";
 
 // A single shared shape for rendering — covers both live Ably messages and ones loaded from the DB
 interface RenderableMessage {
@@ -135,8 +137,10 @@ function ChatBox({ clientId }: { clientId: string }) {
       {/* Messages */}
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
         {isLoadingHistory && (
-          <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-            Loading messages...
+          <div className="flex flex-1 flex-col justify-end gap-3">
+            <Skeleton className="h-8 w-2/5" />
+            <Skeleton className="ml-auto h-8 w-1/2" />
+            <Skeleton className="h-8 w-1/3" />
           </div>
         )}
         {!isLoadingHistory && messages.length === 0 && (
@@ -244,7 +248,13 @@ function Chat() {
     loadUsername();
   }, []);
 
-  if (!username) return null;
+  if (!username) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+        <ChatSkeleton />
+      </div>
+    );
+  }
 
   return (
     <ChatRoomProvider name="chat-room">

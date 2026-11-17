@@ -14,6 +14,7 @@ import { useTodoCRUD } from "./todo/useTodoCRUD";
 import { useTodoForm } from "./todo/useTodoForm";
 import { TodoForm } from "./todo/TodoForm";
 import { TodoItem } from "./todo/TodoItem";
+import { TaskListSkeleton } from "@/features/shared/template/page-skeletons";
 import { calculateDuration, getLocalDateString } from "./todo/utils";
 
 interface TodoItem {
@@ -247,9 +248,7 @@ const TodoSection = ({ selectedDate, onTodosLoaded }: TodoSectionProps) => {
       {/* Todo list */}
       <div className="space-y-2 sm:space-y-3">
         {isInitializing ? (
-          <p className="text-center text-muted-foreground py-4 text-sm sm:text-base">
-            Loading...
-          </p>
+          <TaskListSkeleton />
         ) : filteredTodos.length === 0 ? (
           <p className="text-center text-muted-foreground py-4 text-sm sm:text-base">
             No todos for this day

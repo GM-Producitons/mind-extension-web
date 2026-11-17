@@ -6,6 +6,12 @@ import type { RectangleProps } from "recharts";
 import { Brain, Clock3, Dumbbell, Moon } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ActivityBarsSkeleton,
+  ActivityChartSkeleton,
+} from "@/features/shared/template/page-skeletons";
+import { ActivityColorsButton } from "./ActivityColorsButton";
 import {
   ChartContainer,
   ChartTooltip,
@@ -139,6 +145,28 @@ function byStateMsFromRow(
   return totals;
 }
 
+function ActivityAverageList({
+  byState,
+  barHeightClass,
+}: {
+  byState: Record<StoredActivityState, number>;
+  barHeightClass?: string;
+}) {
+  const durations = AVERAGE_ROWS.map((row) => row.duration(byState));
+  const scaleMs = Math.max(0, ...durations);
+
+  return AVERAGE_ROWS.map((row, index) => (
+    <ActivityLegendRow
+      key={row.states.join("-")}
+      icon={row.icon}
+      segments={segmentsFromStates(byState, row.states)}
+      durationMs={durations[index] ?? 0}
+      scaleMs={scaleMs}
+      barHeightClass={barHeightClass}
+    />
+  ));
+}
+
 function ActivityTooltip({
   active,
   label,
@@ -168,15 +196,7 @@ function ActivityTooltip({
         {formatDuration(dayMs)}
       </p>
       <div className="grid gap-1 border-t border-border pt-1.5">
-        {AVERAGE_ROWS.map(({ icon, states, duration }) => (
-          <ActivityLegendRow
-            key={states.join("-")}
-            icon={icon}
-            segments={segmentsFromStates(byStateMs, states)}
-            durationMs={duration(byStateMs)}
-            barHeightClass="h-3"
-          />
-        ))}
+        <ActivityAverageList byState={byStateMs} barHeightClass="h-3" />
       </div>
     </div>
   );
@@ -244,26 +264,18 @@ export function WorkChartPanel() {
 
   return (
     <section className="mt-8 border-t border-border">
-      <div className="flex items-center justify-between gap-3 px-3 py-2">
-        <div className="min-w-0 flex-1">
+      <div className="flex items-start justify-between gap-3 px-3 py-2">
+        <div className="min-w-0">
           <p className="text-sm font-medium">Activity</p>
-          <p className="font-mono text-sm tabular-nums text-muted-foreground">
-            {isLoading ? "…" : error ? error : currentLine}
-          </p>
-          {!isLoading && !error && avgByState ? (
-            <div className="mt-1.5 grid gap-1">
-              {AVERAGE_ROWS.map(({ icon, states, duration }) => (
-                <ActivityLegendRow
-                  key={states.join("-")}
-                  icon={icon}
-                  segments={segmentsFromStates(avgByState, states)}
-                  durationMs={duration(avgByState)}
-                />
-              ))}
-            </div>
-          ) : null}
+          {isLoading ? (
+            <Skeleton className="mt-1 h-4 w-24" />
+          ) : (
+            <p className="font-mono text-sm tabular-nums text-muted-foreground">
+              {error ? error : currentLine}
+            </p>
+          )}
         </div>
-        <div className="flex shrink-0 gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           <Button
             size="xs"
             variant={view === "week" ? "default" : "outline"}
@@ -280,9 +292,23 @@ export function WorkChartPanel() {
           >
             Month
           </Button>
+          <ActivityColorsButton />
         </div>
       </div>
-      {data ? <WorkBars data={data} view={view} /> : <div className="h-56" />}
+      <div className="grid gap-1 px-3 pb-2">
+        {isLoading ? (
+          <ActivityBarsSkeleton />
+        ) : !error && avgByState ? (
+          <ActivityAverageList byState={avgByState} />
+        ) : null}
+      </div>
+      {data ? (
+        <WorkBars data={data} view={view} />
+      ) : isLoading ? (
+        <ActivityChartSkeleton />
+      ) : (
+        <div className="h-56" />
+      )}
     </section>
   );
 }

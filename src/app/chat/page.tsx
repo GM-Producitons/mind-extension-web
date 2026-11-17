@@ -4,6 +4,7 @@ import * as Ably from "ably";
 import { ChatClient, LogLevel } from "@ably/chat";
 import { ChatClientProvider } from "@ably/chat/react";
 import { AblyProvider } from "ably/react";
+import { ChatSkeleton } from "@/features/shared/template/page-skeletons";
 import Chat from "@/features/chat/Chat";
 import { logChatAccess } from "./actions";
 
@@ -63,7 +64,13 @@ export default function ChatPage() {
     void logChatAccess();
   }, [userFlags]);
 
-  if (!clients) return null;
+  if (!clients) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
+        <ChatSkeleton />
+      </div>
+    );
+  }
 
   return (
     <AblyProvider client={clients.realtimeClient}>

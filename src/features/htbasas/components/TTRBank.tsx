@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft } from "lucide-react";
 import { getTTRs } from "../apis/actions";
+import { TaskListSkeleton } from "@/features/shared/template/page-skeletons";
 
 interface TTR {
   _id: string;
@@ -83,9 +84,7 @@ const TTRBank = () => {
       {/* TTRs List */}
       <div className="space-y-2 sm:space-y-3">
         {loading ? (
-          <p className="text-center text-muted-foreground text-sm sm:text-base">
-            Loading...
-          </p>
+          <TaskListSkeleton rows={6} />
         ) : filteredTtrs.length === 0 ? (
           <p className="text-center text-muted-foreground py-8 text-sm sm:text-base">
             {ttrs.length === 0 ? "No TTRs found" : "No TTRs match your search"}

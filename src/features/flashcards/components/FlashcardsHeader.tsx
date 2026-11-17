@@ -15,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PageHeader } from "@/features/shared/template/page-header";
 import type { ClusterSort } from "../types";
 
 const SORT_OPTIONS: { value: ClusterSort; label: string }[] = [
@@ -44,7 +43,6 @@ export function FlashcardsHeader({
 }: FlashcardsHeaderProps) {
   return (
     <div className="sticky top-0 z-10 mb-4 bg-background">
-      <PageHeader title="Flashcards" size="sm" className="mb-3" />
       <div className="flex flex-wrap items-center gap-2">
         <InputGroup className="w-full sm:w-56">
           <InputGroupAddon>

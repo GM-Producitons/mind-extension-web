@@ -78,25 +78,35 @@ export function ActivityLegendRow({
   icon: RowIcon,
   segments,
   durationMs,
+  scaleMs,
   barHeightClass = "h-4",
 }: {
   icon: LucideIcon;
   segments: ActivityBarSegment[];
   durationMs: number;
+  /** Longest value in the set. Bar width is duration / scale. */
+  scaleMs: number;
   barHeightClass?: string;
 }) {
+  const fraction = scaleMs > 0 ? durationMs / scaleMs : 0;
+
   return (
     <div className="flex items-center gap-2">
       <RowIcon
         className="size-3.5 shrink-0 text-muted-foreground"
         aria-hidden
       />
-      <ActivityProportionalBar
-        segments={segments}
-        heightClass={barHeightClass}
-        className="min-w-0 flex-1"
-      />
-      <span className="shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground">
+      <div className="min-w-0 flex-1">
+        {fraction > 0 ? (
+          <div style={{ width: `${fraction * 100}%` }}>
+            <ActivityProportionalBar
+              segments={segments}
+              heightClass={barHeightClass}
+            />
+          </div>
+        ) : null}
+      </div>
+      <span className="w-14 shrink-0 text-right font-mono text-[10px] tabular-nums text-muted-foreground">
         {formatDuration(durationMs)}
       </span>
     </div>

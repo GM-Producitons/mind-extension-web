@@ -18,6 +18,7 @@ import {
   getUserTTRTags,
 } from "../apis/actions";
 import { Textarea } from "@/components/ui/textarea";
+import { TaskListSkeleton } from "@/features/shared/template/page-skeletons";
 import { getLocalDateString } from "./todo/utils";
 
 interface TTRItem {
@@ -316,9 +317,7 @@ const TTRSection = ({ selectedDate, onTTRsLoaded }: TTRSectionProps) => {
       </div>
       <div className="space-y-2 sm:space-y-3">
         {isInitializing ? (
-          <p className="text-center text-muted-foreground py-4 text-sm sm:text-base">
-            Loading...
-          </p>
+          <TaskListSkeleton rows={3} />
         ) : filteredTtrs.length === 0 ? (
           <p className="text-center text-muted-foreground py-4 text-sm sm:text-base">
             No TTRs for this day

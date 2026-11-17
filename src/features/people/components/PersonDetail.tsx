@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PersonSkeleton } from "@/features/shared/template/page-skeletons";
 import { PageHeader } from "@/features/shared/template/page-header";
 import { usePersonPage } from "../hooks/use-person-page";
 
@@ -28,7 +29,7 @@ export function PersonDetail({ id }: { id: string }) {
       </Button>
 
       {isLoading ? (
-        <p className="text-xs text-muted-foreground">Loading</p>
+        <PersonSkeleton />
       ) : error || !person ? (
         <p className="text-xs text-destructive">{error ?? "Person not found"}</p>
       ) : (
