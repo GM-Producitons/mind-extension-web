@@ -70,7 +70,7 @@ export default function Login() {
   );
 
   return (
-    <div className="flex h-full w-full items-center justify-center px-4 max-md:pb-24">
+    <div className="flex h-full w-full items-center justify-center px-4">
       <Card className="flex w-full max-w-sm flex-col items-center justify-center max-md:border-0 max-md:shadow-none">
         <CardTitle>Who are you?</CardTitle>
         <CardContent className="w-full">

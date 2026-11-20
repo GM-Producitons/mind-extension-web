@@ -5,7 +5,7 @@ import Draggable from "react-draggable";
 import { AnimatePresence, motion } from "motion/react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Settings,
   LayoutDashboard,
@@ -53,6 +53,7 @@ export default function SettingsButton() {
   const dragStartRef = useRef({ x: 0, y: 0 });
   const { theme, setTheme } = useTheme();
   const router = useRouter();
+  const pathname = usePathname();
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -273,7 +274,9 @@ export default function SettingsButton() {
   if (isMobile) {
     return (
       <>
-        <MobileDock apps={apps} onApp={(app) => void runAppAction(app)} />
+        {pathname === "/login" ? null : (
+          <MobileDock apps={apps} onApp={(app) => void runAppAction(app)} />
+        )}
         <SettingsModal
           isOpen={notificationModalOpen}
           onClose={() => setNotificationModalOpen(false)}
