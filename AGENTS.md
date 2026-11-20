@@ -26,7 +26,7 @@ When adding:
 - Layouts stay compact: small controls, tight padding, short row heights. A surface takes the minimum space needed to show its data.
 - Tables and lists show the relevant fields. Prefer many compact rows over a few large cards.
 - Do not nest cards. A group header is a muted bar, not a card wrapping a card.
-- Feature landing pages do not show a feature-name title or a header Add button. The dock names the page and the + creates. Entity titles (a person, a pace group, a practice set) can stay. Do not add a second title block.
+- Feature landing pages do not show a feature-name title or a header Add button. The + on the mobile bottom nav creates. Entity titles (a person, a pace group, a practice set) can stay. Do not add a second title block.
 
 ## Color, type, and icons
 
@@ -57,8 +57,8 @@ When adding:
 ## Mobile (`max-width: 767px`)
 
 - Layout chrome (sidebar, header, bottom nav, split panes) uses Tailwind `max-md:` / `md:` so the mobile layout is in CSS. The root layout boot script sets `data-viewport-mobile` before hydration. `useIsMobile` (`src/hooks/use-mobile.ts`) reads that attribute with `useSyncExternalStore`. Do not default the viewport in `useEffect`.
-- Authenticated shells use a bottom nav instead of a sheet sidebar: Home (house icon), Create (+), Menu. Menu opens a glass panel with a spring-animated active pill (`motion/react`). The user row opens a profile `Drawer`. Profile editing on mobile uses that drawer. Desktop keeps the sidebar.
-- Mobile menu root links are destinations. Home and create stay on the Home item and the + button. Grouped areas drill in (`>` on the root, `<` back) and list that group's children.
+- Authenticated shells use a bottom nav: Home (house icon), Create (+), Menu. Home always goes to `/dashboard`. On `/dashboard` the Home control is a filled button. The user row opens a profile `Drawer`. Profile editing on mobile uses that drawer. Desktop keeps the floating settings control.
+- Menu opens a bottom drawer with no visible title. The drawer is an icon grid, three per row, in this order: MyInsta, Pace, People, Flashcards. The second row is Flashcards, then an ellipsis that reveals the remaining apps in that same grid. Login does not show the bottom nav.
 - Prefer `Drawer` (`src/components/ui/drawer.tsx`, `direction="bottom"`) over `Dialog` for profile, comments, attachments, and row detail. Primary actions sit in `DrawerFooter`. Detail editors are a `Dialog` on desktop and a bottom `Drawer` on mobile.
 - List pages keep the bottom nav, use a sticky search header with `+` at the right end, and scroll the page. Do not add a nested scroll container around a list unless the pane is a fixed split (a sidebar beside an editor). Tap a card or row to open a detail drawer.
 - Form routes hide the header and the bottom nav. Back is a `<` chevron only. A floating secondary action sits bottom-left and save sits bottom-right. Drag-and-drop mounts client-only.
